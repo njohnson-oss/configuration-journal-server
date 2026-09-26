@@ -6,15 +6,15 @@
 Port {{ ssh_port }}
 AddressFamily any
 
-KexAlgorithms {{ ssh_kex_effective | join(',') }}
-Ciphers {{ ssh_ciphers | join(',') }}
-MACs {{ ssh_macs | join(',') }}
+KexAlgorithms {{ ssh_hardening_kex_effective | join(',') }}
+Ciphers {{ ssh_hardening_ciphers | join(',') }}
+MACs {{ ssh_hardening_macs | join(',') }}
 
-{% for key in ssh_host_keys_effective %}
+{% for key in ssh_hardening_host_keys_effective %}
 HostKey {{ key }}
 {% endfor %}
-HostKeyAlgorithms {{ ssh_host_key_algorithms | join(',') }}
-PubkeyAcceptedAlgorithms {{ ssh_pubkey_algorithms | join(',') }}
+HostKeyAlgorithms {{ ssh_hardening_host_key_algorithms | join(',') }}
+PubkeyAcceptedAlgorithms {{ ssh_hardening_pubkey_algorithms | join(',') }}
 
 PermitRootLogin no
 AuthenticationMethods publickey
@@ -24,10 +24,10 @@ KbdInteractiveAuthentication no
 PermitEmptyPasswords no
 AllowUsers {{ ssh_allowed_users | join(' ') }}
 
-MaxAuthTries {{ ssh_max_auth_tries }}
-LoginGraceTime {{ ssh_login_grace }}
-ClientAliveInterval {{ ssh_client_alive_interval }}
-ClientAliveCountMax {{ ssh_client_alive_count_max }}
+MaxAuthTries {{ ssh_hardening_max_auth_tries }}
+LoginGraceTime {{ ssh_hardening_login_grace }}
+ClientAliveInterval {{ ssh_hardening_client_alive_interval }}
+ClientAliveCountMax {{ ssh_hardening_client_alive_count_max }}
 
 AllowAgentForwarding no
 AllowTcpForwarding no

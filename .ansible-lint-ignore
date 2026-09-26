@@ -4,10 +4,6 @@
 # ansible.builtin.git cannot create a bare repository with --object-format.
 roles/cgit/tasks/main.yml command-instead-of-module
 
-# The ssh_ prefix is shared with ssh_port / ssh_allowed_users in group_vars.
-roles/ssh_hardening/defaults/main.yml var-naming[no-role-prefix]
-roles/ssh_hardening/vars/main.yml var-naming[no-role-prefix]
-
 # The stale public key and hostname must be gone before tor restarts, and
 # only for the services whose key changed. A handler could do it too; kept
 # as a task so the deletion stays next to the key copy that requires it.

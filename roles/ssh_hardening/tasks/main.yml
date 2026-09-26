@@ -1,14 +1,14 @@
 ---
 - name: Install the OpenSSH client
   ansible.builtin.apt:
-    name: "{{ ssh_packages }}"
+    name: "{{ ssh_hardening_packages }}"
     state: present
     update_cache: true
     cache_valid_time: 3600
 
 - name: Create the sshd drop-in directory
   ansible.builtin.file:
-    path: "{{ ssh_dropin_path | dirname }}"
+    path: "{{ ssh_hardening_dropin_path | dirname }}"
     state: directory
     owner: root
     group: root
@@ -25,27 +25,27 @@
 - name: Ask OpenSSH which key exchange algorithms it implements
   ansible.builtin.command: ssh -Q kex
   changed_when: false
-  register: ssh_kex_available
+  register: ssh_hardening_kex_available
 
 - name: Keep only the post-quantum algorithms this build offers
   ansible.builtin.set_fact:
-    ssh_kex_effective: "{{ ssh_kex_preferred | select('in', ssh_kex_available.stdout_lines) | list }}"
+    ssh_hardening_kex_effective: "{{ ssh_hardening_kex_preferred | select('in', ssh_hardening_kex_available.stdout_lines) | list }}"
 
 - name: Refuse to continue without a post-quantum key exchange
   ansible.builtin.assert:
     that:
-      - ssh_kex_effective | length > 0
+      - ssh_hardening_kex_effective | length > 0
     fail_msg: >-
-      This host's OpenSSH supports none of {{ ssh_kex_preferred | join(', ') }}.
+      This host's OpenSSH supports none of {{ ssh_hardening_kex_preferred | join(', ') }}.
       sntrup761x25519 needs OpenSSH >= 8.5, mlkem768x25519 needs >= 9.9.
-      Upgrade OpenSSH. ssh_kex_preferred is role policy, not a setting;
+      Upgrade OpenSSH. ssh_hardening_kex_preferred is role policy, not a setting;
       relaxing it for one run needs an explicit -e and drops the
       post-quantum guarantee this playbook exists to provide.
     quiet: true
 
 - name: Fall back to the Ed25519 host key when none is configured
   ansible.builtin.set_fact:
-    ssh_host_keys_effective: "{{ ssh_host_keys | default([], true) or ['/etc/ssh/ssh_host_ed25519_key'] }}"
+    ssh_hardening_host_keys_effective: "{{ ssh_hardening_host_keys | default([], true) or ['/etc/ssh/ssh_host_ed25519_key'] }}"
 
 - name: Collect service facts
   ansible.builtin.service_facts:
@@ -64,20 +64,20 @@
   ansible.builtin.command:
     argv: [ssh-keygen, -q, -t, ed25519, -N, "", -f, "{{ item }}"]
     creates: "{{ item }}"
-  loop: "{{ ssh_host_keys_effective }}"
+  loop: "{{ ssh_hardening_host_keys_effective }}"
   notify: restart sshd
 
 - name: Install the hardened configuration
   ansible.builtin.template:
     src: hardening.conf.j2
-    dest: "{{ ssh_dropin_path }}"
+    dest: "{{ ssh_hardening_dropin_path }}"
     owner: root
     group: root
     mode: "0600"
     validate: "/usr/sbin/sshd -t -f %s"
   notify: restart sshd
 
-- name: Remove host keys that are not in ssh_host_keys
+- name: Remove host keys that are not in ssh_hardening_host_keys
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
@@ -86,11 +86,11 @@
     - /etc/ssh/ssh_host_rsa_key.pub
     - /etc/ssh/ssh_host_ecdsa_key
     - /etc/ssh/ssh_host_ecdsa_key.pub
-  when: (item | regex_replace('\.pub$', '')) not in ssh_host_keys_effective
+  when: (item | regex_replace('\.pub$', '')) not in ssh_hardening_host_keys_effective
   notify: restart sshd
 
 - name: Enable sshd
   ansible.builtin.systemd_service:
-    name: "{{ ssh_service }}"
+    name: "{{ ssh_hardening_service }}"
     enabled: true
     state: started

@@ -8,17 +8,17 @@
 
 # Key exchange: PQ-hybrid ONLY. Filtered against `ssh -Q kex` in tasks/,
 # which fails the run if this host's OpenSSH offers none of them.
-ssh_kex_preferred:
+ssh_hardening_kex_preferred:
   - mlkem768x25519-sha256                 # OpenSSH >= 9.9
   - sntrup761x25519-sha512                # OpenSSH >= 9.9 (standard name)
   - sntrup761x25519-sha512@openssh.com    # OpenSSH >= 8.5
 
 # Symmetric ciphers: 256-bit AEAD only. Grover's algorithm halves the
 # effective key length, so 256-bit remains a 128-bit security margin.
-ssh_ciphers:
+ssh_hardening_ciphers:
   - chacha20-poly1305@openssh.com
 
-ssh_macs:
+ssh_hardening_macs:
   - hmac-sha2-512-etm@openssh.com
   - hmac-sha2-256-etm@openssh.com
 
@@ -32,12 +32,12 @@ ssh_macs:
 #
 # tasks/ deletes RSA/ECDSA host keys not listed here and generates any
 # listed key that is missing. Empty or unset means the Ed25519 key.
-ssh_host_keys:
+ssh_hardening_host_keys:
   - /etc/ssh/ssh_host_ed25519_key
-ssh_host_key_algorithms:
+ssh_hardening_host_key_algorithms:
   - ssh-ed25519
   - ssh-ed25519-cert-v01@openssh.com
-ssh_pubkey_algorithms:
+ssh_hardening_pubkey_algorithms:
   - ssh-ed25519
   - ssh-ed25519-cert-v01@openssh.com
   - sk-ssh-ed25519@openssh.com
