@@ -1,8 +1,6 @@
 # Known, deliberate deviations from the production profile. Anything not
 # listed here fails CI. Remove an entry once the code no longer needs it.
 
-# The play sets `become: true`; these tasks only switch to the cgit user.
-roles/cgit/tasks/main.yml partial-become[task]
 # ansible.builtin.git cannot create a bare repository with --object-format.
 roles/cgit/tasks/main.yml command-instead-of-module
 

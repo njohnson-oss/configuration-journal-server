@@ -51,6 +51,7 @@
     bare: true
     update: true
     version: "{{ item.version | default('HEAD') }}"
+  become: true
   become_user: "{{ cgit_user }}"
   loop: "{{ cgit_repositories | selectattr('source', 'defined') | list }}"
   loop_control:
@@ -62,6 +63,7 @@
       git init --bare --object-format={{ cgit_object_format }}
       --initial-branch={{ cgit_initial_branch }} {{ cgit_repo_root }}/{{ item.name }}.git
     creates: "{{ cgit_repo_root }}/{{ item.name }}.git/HEAD"
+  become: true
   become_user: "{{ cgit_user }}"
   loop: "{{ cgit_repositories | rejectattr('source', 'defined') | list }}"
   loop_control:
