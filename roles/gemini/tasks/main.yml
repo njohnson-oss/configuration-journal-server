@@ -1,0 +1,286 @@
+---
+# The unit runs Agate unprivileged from the start, with an empty
+# capability bounding set and a private user namespace, so it cannot
+# bind a port below 1024. Catch that here rather than as a unit that
+# fails to start.
+- name: Refuse to bind Agate to a privileged port
+  ansible.builtin.assert:
+    that:
+      - gemini_port | int > 1023
+      - gemini_hidden_port | int > 1023
+    fail_msg: >-
+      gemini_port ({{ gemini_port }}) and gemini_hidden_port
+      ({{ gemini_hidden_port }}) must both be above 1023 — Agate runs
+      without root or CAP_NET_BIND_SERVICE and cannot bind below that.
+    quiet: true
+
+- name: Create the gemini service group
+  ansible.builtin.group:
+    name: "{{ gemini_group }}"
+    system: true
+    state: present
+
+- name: Create the gemini service user
+  ansible.builtin.user:
+    name: "{{ gemini_user }}"
+    group: "{{ gemini_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    home: "{{ gemini_root }}"
+    create_home: false
+    state: present
+
+- name: Install the packages the role needs
+  ansible.builtin.apt:
+    name: "{{ gemini_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+# ── Binary ────────────────────────────────────────────────────────────
+# Agate is not in Debian, so the upstream release is fetched and pinned by
+# checksum. It is installed under its version and symlinked, so a version
+# bump is a new file rather than an overwrite of a running binary.
+- name: Select the release for this architecture
+  ansible.builtin.set_fact:
+    gemini_target: "{{ gemini_release_targets[ansible_facts.architecture] | default('') }}"
+
+- name: Refuse to deploy on an architecture with no pinned release
+  ansible.builtin.assert:
+    that:
+      - gemini_target | length > 0
+      - gemini_target in gemini_release_checksums
+    fail_msg: >-
+      no pinned Agate release for {{ ansible_facts.architecture }} — add the
+      target triple and its sha256 to gemini_release_targets/gemini_release_checksums.
+    quiet: true
+
+- name: Create the download cache
+  ansible.builtin.file:
+    path: "{{ gemini_cache_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Fetch the Agate release
+  ansible.builtin.get_url:
+    url: "{{ gemini_release_base }}/v{{ gemini_version }}/agate.{{ gemini_target }}.gz"
+    dest: "{{ gemini_cache_dir }}/agate-{{ gemini_version }}.{{ gemini_target }}.gz"
+    checksum: "sha256:{{ gemini_release_checksums[gemini_target] }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Unpack the binary
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail &&
+      gunzip -c {{ gemini_cache_dir }}/agate-{{ gemini_version }}.{{ gemini_target }}.gz
+      > {{ gemini_versioned_binary }}.partial &&
+      mv {{ gemini_versioned_binary }}.partial {{ gemini_versioned_binary }}
+    creates: "{{ gemini_versioned_binary }}"
+  args:
+    executable: /bin/bash
+
+- name: Make the binary executable
+  ansible.builtin.file:
+    path: "{{ gemini_versioned_binary }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Point agate at the installed version
+  ansible.builtin.file:
+    src: "{{ gemini_versioned_binary }}"
+    dest: "{{ gemini_binary }}"
+    state: link
+  notify: restart agate
+
+# ── Directories ───────────────────────────────────────────────────────
+- name: Create the capsule and certificate directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "0750"
+  loop:
+    - "{{ gemini_root }}"
+    - "{{ gemini_content_dir }}"
+    - "{{ gemini_config_dir }}"
+    - "{{ gemini_cert_dir }}"
+    - "{{ gemini_pem_dir }}"
+
+# ── Certificates ──────────────────────────────────────────────────────
+# Ansible owns the PEM material; the DER beside it is what Agate reads.
+# Hostnames listed in gemini_certificates use the user's material; every
+# other hostname gets a long-lived self-signed pair generated here.
+- name: Install the user-supplied certificates
+  ansible.builtin.copy:
+    src: "{{ item.value.cert }}"
+    dest: "{{ gemini_pem_dir }}/{{ item.key }}.crt"
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "0644"
+  loop: "{{ gemini_certificates | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Install the user-supplied keys
+  ansible.builtin.copy:
+    src: "{{ item.value.key }}"
+    dest: "{{ gemini_pem_dir }}/{{ item.key }}.key"
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "0640"
+  loop: "{{ gemini_certificates | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  no_log: true
+
+- name: Select the hostnames that need generated material
+  ansible.builtin.set_fact:
+    gemini_generated_hosts: "{{ gemini_hostnames | reject('in', gemini_certificates) | list }}"
+
+- name: Generate a private key
+  community.crypto.openssl_privatekey:
+    path: "{{ gemini_pem_dir }}/{{ item }}.key"
+    type: "{{ gemini_key_type }}"
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "0640"
+  loop: "{{ gemini_generated_hosts }}"
+
+- name: Generate a signing request
+  community.crypto.openssl_csr:
+    path: "{{ gemini_pem_dir }}/{{ item }}.csr"
+    privatekey_path: "{{ gemini_pem_dir }}/{{ item }}.key"
+    common_name: "{{ item }}"
+    subject_alt_name: "DNS:{{ item }}"
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "0640"
+  loop: "{{ gemini_generated_hosts }}"
+
+- name: Self-sign the certificate
+  community.crypto.x509_certificate:
+    path: "{{ gemini_pem_dir }}/{{ item }}.crt"
+    privatekey_path: "{{ gemini_pem_dir }}/{{ item }}.key"
+    csr_path: "{{ gemini_pem_dir }}/{{ item }}.csr"
+    provider: selfsigned
+    selfsigned_not_after: "{{ gemini_cert_days }}"
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "0644"
+  loop: "{{ gemini_generated_hosts }}"
+
+# Agate wants X.509 DER at <certs>/<hostname>/{cert,key}.der. The
+# conversion is deterministic, so it always runs and the copy below is
+# what decides whether anything actually changed.
+- name: Convert the certificate material to DER
+  ansible.builtin.command:
+    cmd: >-
+      openssl {{ item.1.kind }}
+      -in {{ gemini_pem_dir }}/{{ item.0 }}.{{ item.1.pem }}
+      -outform der
+      -out {{ gemini_pem_dir }}/{{ item.0 }}.{{ item.1.der }}
+  loop: "{{ gemini_hostnames | product(gemini_der_conversions) | list }}"
+  loop_control:
+    label: "{{ item.0 }}/{{ item.1.der }}"
+  changed_when: false
+
+- name: Create a certificate directory per hostname
+  ansible.builtin.file:
+    path: "{{ gemini_cert_dir }}/{{ item }}"
+    state: directory
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "0750"
+  loop: "{{ gemini_hostnames }}"
+
+- name: Install the DER certificate material
+  ansible.builtin.copy:
+    src: "{{ gemini_pem_dir }}/{{ item.0 }}.{{ item.1.der }}"
+    dest: "{{ gemini_cert_dir }}/{{ item.0 }}/{{ item.1.der }}"
+    remote_src: true
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "{{ item.1.mode }}"
+  loop: "{{ gemini_hostnames | product(gemini_der_conversions) | list }}"
+  loop_control:
+    label: "{{ item.0 }}/{{ item.1.der }}"
+  notify: restart agate
+
+# Agate generates a certificate for any hostname it finds none for,
+# rather than refusing to start. A conversion that silently produced
+# nothing would therefore be served as a key no client has ever pinned.
+- name: Confirm every hostname has certificate material
+  ansible.builtin.stat:
+    path: "{{ gemini_cert_dir }}/{{ item.0 }}/{{ item.1.der }}"
+  loop: "{{ gemini_hostnames | product(gemini_der_conversions) | list }}"
+  loop_control:
+    label: "{{ item.0 }}/{{ item.1.der }}"
+  register: gemini_installed_certs
+
+- name: Refuse to start Agate with certificate material missing
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.size > 0
+    fail_msg: >-
+      {{ item.item.0 }}: {{ item.item.1.der }} is missing or empty — Agate
+      would generate its own certificate and serve a key nobody has pinned.
+    quiet: true
+  loop: "{{ gemini_installed_certs.results }}"
+  loop_control:
+    label: "{{ item.item.0 }}/{{ item.item.1.der }}"
+
+# ── Content ───────────────────────────────────────────────────────────
+- name: Deploy the supplied capsule content
+  ansible.builtin.copy:
+    src: "{{ capsule_source }}/"
+    dest: "{{ gemini_content_dir }}/"
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "0640"
+    directory_mode: "0750"
+  when: capsule_source | length > 0
+
+- name: Deploy a placeholder capsule when no content was supplied
+  ansible.builtin.template:
+    src: index.gmi.j2
+    dest: "{{ gemini_content_dir }}/index.gmi"
+    owner: root
+    group: "{{ gemini_group }}"
+    mode: "0640"
+  when: capsule_source | length == 0
+
+# With more than one --hostname Agate serves <content>/<hostname>/. All
+# the names are the same capsule, so each is a link to the one copy.
+- name: Point every hostname at the capsule
+  ansible.builtin.file:
+    src: "{{ gemini_content_dir }}"
+    dest: "{{ gemini_root }}/{{ item }}"
+    state: link
+    owner: root
+    group: "{{ gemini_group }}"
+  loop: "{{ gemini_hostnames }}"
+  when: gemini_hostnames | length > 1
+
+# ── Service ───────────────────────────────────────────────────────────
+- name: Write the systemd unit
+  ansible.builtin.template:
+    src: agate.service.j2
+    dest: "/etc/systemd/system/{{ gemini_service }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart agate
+
+- name: Enable Agate
+  ansible.builtin.systemd_service:
+    name: "{{ gemini_service }}"
+    enabled: true
+    state: started
+    daemon_reload: true

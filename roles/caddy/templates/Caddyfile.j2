@@ -1,0 +1,53 @@
+# {{ ansible_managed }}
+# Vhosts live in {{ caddy_sites_dir }} and are written by the role that
+# owns the service. This file holds global options and shared snippets.
+
+{
+	email {{ acme_email }}
+	http_port {{ web_http_port }}
+	https_port {{ web_https_port }}
+	servers {
+		protocols {{ caddy_protocols | join(' ') }}
+	}
+	log {
+		output file {{ caddy_log_dir }}/caddy.log
+		level {{ caddy_log_level }}
+		format filter {
+{% for field in caddy_log_redacted_fields %}
+			{{ field }} delete
+{% endfor %}
+		}
+	}
+}
+
+# Global options come before any snippet can be defined, so the block
+# above repeats this rather than importing it. Vhosts import it inside their log.
+(redact_ips) {
+	format filter {
+{% for field in caddy_log_redacted_fields %}
+		{{ field }} delete
+{% endfor %}
+	}
+}
+
+(pq_tls) {
+	tls {
+		protocols {{ tls_protocol_min }} {{ tls_protocol_max }}
+{% if tls_curves %}
+		curves {{ tls_curves | join(' ') }}
+{% endif %}
+	}
+}
+
+# Headers that are safe on every transport. HSTS is deliberately absent:
+# it is meaningless over .onion/.i2p and is set per-vhost on the TLS sites.
+(security_headers) {
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+}
+
+import {{ caddy_sites_dir }}/*.caddy

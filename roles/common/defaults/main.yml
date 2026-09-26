@@ -1,0 +1,11 @@
+---
+# The trust store every outbound fetch needs, and unattended upgrades.
+# Dependencies used by a single role are declared by that role, so
+# tag-scoped runs install what they need on their own.
+common_packages:
+  - ca-certificates
+  - needrestart
+  - unattended-upgrades
+
+common_admin_groups: [sudo]
+common_admin_shell: /bin/bash

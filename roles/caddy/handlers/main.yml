@@ -1,0 +1,14 @@
+---
+# Validate the configuration before reloading, so a broken vhost from
+# any role never takes the running server down.
+- name: Validate the Caddy configuration
+  ansible.builtin.command:
+    cmd: "{{ caddy_binary }} validate --adapter caddyfile --config {{ caddy_config_path }}"
+  changed_when: false
+  listen: reload caddy
+
+- name: Reload Caddy
+  ansible.builtin.systemd_service:
+    name: "{{ caddy_service }}"
+    state: reloaded
+  listen: reload caddy

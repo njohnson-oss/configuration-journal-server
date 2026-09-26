@@ -1,0 +1,57 @@
+---
+# openssl converts the generated PEM material into the DER Agate expects;
+# python3-cryptography backs the community.crypto modules that generate it.
+gemini_packages: [openssl, python3-cryptography]
+
+# ── Agate ─────────────────────────────────────────────────────────────
+# Agate is Rust. It is not packaged for Debian, so the release binary is
+# fetched and pinned by checksum. Update the version and the checksums
+# together -- get_url refuses the download if they disagree.
+gemini_service: agate
+gemini_version: 3.3.24
+gemini_release_base: "https://github.com/mbrubeck/agate/releases/download"
+gemini_bin_dir: /usr/local/bin
+gemini_binary: "{{ gemini_bin_dir }}/agate"
+gemini_versioned_binary: "{{ gemini_bin_dir }}/agate-{{ gemini_version }}"
+gemini_cache_dir: /var/cache/agate
+
+# sha256 of the published .gz, per target triple.
+gemini_release_targets:
+  x86_64: x86_64-unknown-linux-gnu
+  aarch64: aarch64-unknown-linux-gnu
+gemini_release_checksums:
+  x86_64-unknown-linux-gnu: 32379846ff14ce980377455bd935dd8635c56c61a0f336fb76aa461195110404
+  aarch64-unknown-linux-gnu: 5e5e2f81d127da77a4b12e78d3d06e28b639246103bf9e8508bdb0103429b8f2
+
+gemini_user: gemini
+gemini_group: gemini
+
+# ── Layout ────────────────────────────────────────────────────────────
+# Agate has no config file; everything is command line flags in the unit.
+#
+# With more than one --hostname it serves <content>/<hostname>/, so each
+# name gets a directory. All three names are the same capsule, so the
+# content is deployed once and the per-name directories are symlinks to
+# it.
+gemini_root: /srv/gemini                          # --content, holds the vhosts
+gemini_content_dir: "{{ gemini_root }}/capsule"   # the capsule itself
+gemini_config_dir: /etc/agate
+gemini_cert_dir: "{{ gemini_config_dir }}/certs"  # --certs, DER, per host
+gemini_pem_dir: "{{ gemini_config_dir }}/pem"     # PEM, what Ansible manages
+
+# openssl invocation per file, and the name Agate expects for each.
+gemini_der_conversions:
+  - kind: x509
+    pem: crt
+    der: cert.der
+    mode: "0644"
+  - kind: pkey
+    pem: key
+    der: key.der
+    mode: "0640"
+
+gemini_listen_addresses:
+  - "0.0.0.0:{{ gemini_port }}"
+  - "[::]:{{ gemini_port }}"
+  - "127.0.0.1:{{ gemini_hidden_port }}"  # Tor and I2P forward here
+gemini_lang: en

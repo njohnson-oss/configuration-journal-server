@@ -1,0 +1,35 @@
+#!/usr/sbin/nft -f
+# {{ ansible_managed }}
+
+flush ruleset
+
+table inet filter {
+	chain input {
+		type filter hook input priority filter; policy drop;
+
+		iif lo accept
+		ct state established,related accept
+
+		# Neighbour discovery is unsolicited, so conntrack cannot admit
+		# it. Without it IPv6 stops working once the neighbour cache
+		# expires. ICMP errors need no rule: they arrive as `related`.
+		icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert, nd-router-advert } accept
+
+{% if firewall_allowed_tcp %}
+		tcp dport { {{ firewall_allowed_tcp | join(', ') }} } ct state new accept
+{% endif %}
+{% if firewall_allowed_udp %}
+		udp dport { {{ firewall_allowed_udp | join(', ') }} } ct state new accept
+{% endif %}
+	}
+
+	chain forward {
+		type filter hook forward priority filter; policy drop;
+	}
+
+	# Egress is deliberately unfiltered: tor and i2pd must reach
+	# arbitrary peers on arbitrary ports.
+	chain output {
+		type filter hook output priority filter; policy accept;
+	}
+}

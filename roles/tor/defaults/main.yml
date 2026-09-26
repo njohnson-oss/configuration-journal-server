@@ -1,0 +1,21 @@
+---
+tor_packages: [tor]
+tor_service: tor
+tor_user: debian-tor
+tor_config_path: /etc/tor/torrc
+tor_service_root: /var/lib/tor
+
+# The only file the user has to supply for a v3 service: the address is
+# the key. Tor writes hs_ed25519_public_key and hostname itself from
+# this one, and the controller derives the same address.
+tor_secret_key_filename: hs_ed25519_secret_key
+
+tor_derived_filenames:
+  - hs_ed25519_public_key
+  - hostname
+
+# How long to wait for tor to publish the hostname of a service it has
+# just been handed a key for.
+tor_hostname_timeout: 30
+
+tor_log: "notice syslog"

@@ -1,0 +1,56 @@
+# {{ ansible_managed }}
+
+# The whole cgit application, defined once and imported by each transport.
+(cgit_app) {
+	import security_headers
+	encode zstd gzip
+
+	handle_path /static/* {
+		root * {{ cgit_static_dir }}
+		file_server
+	}
+
+	# Smart HTTP clone/fetch. git-http-backend is read-only here: nothing
+	# sets http.receivepack, so git-receive-pack is refused.
+	@git path_regexp ^/[^/]+\.git/(HEAD|info/refs|objects/info/[^/]+|objects/[0-9a-f]{2}/([0-9a-f]{38}|[0-9a-f]{62})|objects/pack/pack-([0-9a-f]{40}|[0-9a-f]{64})\.(pack|idx|rev)|git-upload-pack)$
+	handle @git {
+		reverse_proxy unix/{{ cgit_socket }} {
+			transport fastcgi {
+				env SCRIPT_FILENAME {{ cgit_git_http_backend }}
+				env PATH_INFO {http.request.uri.path}
+				env GIT_PROJECT_ROOT {{ cgit_repo_root }}
+				env GIT_HTTP_EXPORT_ALL "1"
+			}
+		}
+	}
+
+	# Everything else is the cgit web interface.
+	handle {
+		reverse_proxy unix/{{ cgit_socket }} {
+			transport fastcgi {
+				env SCRIPT_FILENAME {{ cgit_cgi }}
+				env SCRIPT_NAME ""
+				env PATH_INFO {http.request.uri.path}
+				env CGIT_CONFIG {{ cgit_config_path }}
+			}
+		}
+	}
+
+	log {
+		output file {{ cgit_log }}
+		import redact_ips
+	}
+}
+
+# ── Clearnet ──────────────────────────────────────────────────────────
+{{ cgit_domain }} {
+	import pq_tls
+	header Strict-Transport-Security "{{ cgit_hsts }}"
+	import cgit_app
+}
+
+# ── Tor and I2P ───────────────────────────────────────────────────────
+http://{{ onion_hostnames[cgit_onion_service] }}:{{ cgit_hidden_port }}, http://{{ i2p_addresses[cgit_i2p_tunnel] }}:{{ cgit_hidden_port }} {
+	bind 127.0.0.1
+	import cgit_app
+}

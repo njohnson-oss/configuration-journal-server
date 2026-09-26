@@ -1,0 +1,9 @@
+---
+i2p_packages: [i2pd]
+i2p_service: i2pd
+i2p_user: i2pd
+i2p_group: i2pd
+i2p_config_path: /etc/i2pd/i2pd.conf
+i2p_tunnels_path: /etc/i2pd/tunnels.conf
+i2p_data_dir: /var/lib/i2pd
+i2p_ipv6: true

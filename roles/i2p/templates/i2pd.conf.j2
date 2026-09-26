@@ -1,0 +1,44 @@
+# {{ ansible_managed }}
+
+{% if i2p_bandwidth is not none %}
+bandwidth = {{ i2p_bandwidth }}
+{% endif %}
+ipv4 = true
+ipv6 = {{ i2p_ipv6 }}
+{% if i2p_router_port %}
+port = {{ i2p_router_port }}
+{% endif %}
+{% if i2p_share is not none %}
+share = {{ i2p_share }}
+{% endif %}
+{% if i2p_notransit %}
+notransit = true
+{% endif %}
+{% if i2p_transit_tunnels is not none %}
+
+[limits]
+transittunnels = {{ i2p_transit_tunnels }}
+{% endif %}
+
+# This node only publishes destinations, so every client-facing subsystem
+# (web console, proxies, SAM, BOB, I2CP, I2PControl) stays switched off.
+[http]
+enabled = false
+
+[httpproxy]
+enabled = false
+
+[socksproxy]
+enabled = false
+
+[sam]
+enabled = false
+
+[bob]
+enabled = false
+
+[i2cp]
+enabled = false
+
+[i2pcontrol]
+enabled = false

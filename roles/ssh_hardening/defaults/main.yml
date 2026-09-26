@@ -1,0 +1,12 @@
+---
+# Implementation detail only. The algorithm policy lives in
+# vars/main.yml, where inventory cannot reach it.
+ssh_packages: [openssh-client]  # `ssh -Q kex`, used to probe PQ support
+
+ssh_dropin_path: /etc/ssh/sshd_config.d/10-hardening.conf
+ssh_service: ssh
+
+ssh_max_auth_tries: 3
+ssh_login_grace: 20s
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2

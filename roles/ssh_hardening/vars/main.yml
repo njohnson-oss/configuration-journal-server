@@ -1,0 +1,43 @@
+---
+# ═══════════════════════════════════════════════════════════════════════
+#  Algorithm policy. Role vars, so inventory cannot override them —
+#  hardening.conf.j2 already hardcodes the booleans that matter
+#  (PermitRootLogin, PasswordAuthentication, AllowTcpForwarding); these
+#  are the same policy, kept as names only so the template stays legible.
+# ═══════════════════════════════════════════════════════════════════════
+
+# Key exchange: PQ-hybrid ONLY. Filtered against `ssh -Q kex` in tasks/,
+# which fails the run if this host's OpenSSH offers none of them.
+ssh_kex_preferred:
+  - mlkem768x25519-sha256                 # OpenSSH >= 9.9
+  - sntrup761x25519-sha512                # OpenSSH >= 9.9 (standard name)
+  - sntrup761x25519-sha512@openssh.com    # OpenSSH >= 8.5
+
+# Symmetric ciphers: 256-bit AEAD only. Grover's algorithm halves the
+# effective key length, so 256-bit remains a 128-bit security margin.
+ssh_ciphers:
+  - chacha20-poly1305@openssh.com
+
+ssh_macs:
+  - hmac-sha2-512-etm@openssh.com
+  - hmac-sha2-256-etm@openssh.com
+
+# NOTE: OpenSSH >= 10.4 has an experimental PQ-hybrid signature,
+# ssh-mldsa44-ed25519@openssh.com, but Debian 12/13 ship older releases
+# (trixie-backports has 10.3 as of 2026-09). sshd rejects unknown
+# algorithm names, so host and user authentication stay on Ed25519 until
+# the targets' OpenSSH has it. Signatures can't be forged after the fact,
+# so only the key exchange — the part that matters for
+# store-now-decrypt-later attacks — must be PQ-hybrid today.
+#
+# tasks/ deletes RSA/ECDSA host keys not listed here and generates any
+# listed key that is missing. Empty or unset means the Ed25519 key.
+ssh_host_keys:
+  - /etc/ssh/ssh_host_ed25519_key
+ssh_host_key_algorithms:
+  - ssh-ed25519
+  - ssh-ed25519-cert-v01@openssh.com
+ssh_pubkey_algorithms:
+  - ssh-ed25519
+  - ssh-ed25519-cert-v01@openssh.com
+  - sk-ssh-ed25519@openssh.com

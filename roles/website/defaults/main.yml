@@ -1,0 +1,5 @@
+---
+website_root: "/srv/www/{{ web_domain }}"
+website_vhost_path: "{{ caddy_sites_dir }}/10-website.caddy"
+website_hsts: "max-age=31536000; includeSubDomains"
+website_index: [index.html, index.htm]

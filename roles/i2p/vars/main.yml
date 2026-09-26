@@ -1,0 +1,4 @@
+---
+# Signature type i2pd uses when generating a destination key, which
+# occurs when it cannot open the configured .dat file.
+i2p_tunnel_signature_type: 7

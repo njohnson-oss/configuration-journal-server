@@ -1,0 +1,26 @@
+---
+# ═══════════════════════════════════════════════════════════════════════
+#  What the firewall opens is a consequence of what this stack binds,
+#  not a choice the user makes. Role vars rather than inventory:
+#  a user-configurable ports list drifts out of step with the services
+#  silently.
+#
+#  Adding a service to the play requires adding its port here.
+# ═══════════════════════════════════════════════════════════════════════
+
+# Left unset (the default), i2pd chooses a random port at first start and
+# keeps it, which no rule here can anticipate — so inbound transit needs
+# i2p_router_port set to work.
+firewall_i2p_ports: "{{ [i2p_router_port] if (i2p_router_port | default(none)) else [] }}"
+
+# Clearnet listeners: sshd, Caddy, Agate. The loopback ports the hidden
+# transports forward to are deliberately absent — nothing outside
+# 127.0.0.1 reaches them, so the firewall never needs to see them.
+firewall_allowed_tcp: >-
+  {{ ([ssh_port, web_http_port, web_https_port, gemini_port] + firewall_i2p_ports)
+     | map('string') | unique | list }}
+
+# QUIC for the clearnet web, and i2pd's SSU2, which shares the NTCP2 port.
+firewall_allowed_udp: >-
+  {{ ([web_https_port] + firewall_i2p_ports)
+     | map('string') | unique | list }}

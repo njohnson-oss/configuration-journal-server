@@ -1,0 +1,77 @@
+---
+- name: Hardened web / Gemini / Git host reachable over TLS, Tor, and I2P
+  hosts: journal
+  become: true
+
+  vars_files:
+    - vars/policy.yml
+
+  pre_tasks:
+    # Package names, paths and versions (cgit's SHA-256 support among them)
+    # are chosen for these releases only.
+    - name: Refuse to deploy to anything but Debian 12 or 13
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['distribution'] == 'Debian'
+          - ansible_facts['distribution_major_version'] in ['12', '13']
+        fail_msg: >-
+          This playbook supports Debian 12 and 13 only; the host runs
+          {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}.
+        quiet: true
+      tags: [always]
+
+    - name: Refuse to deploy without the user's SSH keys
+      ansible.builtin.assert:
+        that:
+          - admin_authorized_keys | length > 0
+        fail_msg: >-
+          admin_authorized_keys is empty. Pass the public key(s) at
+          deploy time. E.g: -e '{"admin_authorized_keys":["ssh-ed25519 AAAA..."]}'
+        quiet: true
+      tags: [always]
+
+    - name: Derive the onion address of each supplied hidden service key
+      ansible.builtin.set_fact:
+        onion_hostnames: "{{ onion_hostnames | default({}) | combine({item.name: (item.key_dir ~ '/hs_ed25519_secret_key') | onion_address}) }}"
+      loop: "{{ tor_onion_services }}"
+      loop_control:
+        label: "{{ item.name }}"
+      tags: [always]
+
+    - name: Derive the I2P destination address of each supplied tunnel key
+      ansible.builtin.set_fact:
+        i2p_addresses: "{{ i2p_addresses | default({}) | combine({item.name: item.keyfile | i2p_b32}) }}"
+      loop: "{{ i2p_server_tunnels }}"
+      loop_control:
+        label: "{{ item.name }}"
+      tags: [always]
+
+    - name: Show the addresses this host will answer to
+      ansible.builtin.debug:
+        msg:
+          - "web     : https://{{ web_domain }} | http://{{ onion_hostnames[web_onion_service] }} | http://{{ i2p_addresses[web_i2p_tunnel] }}"
+          - "gemini  : {{ gemini_hostnames | map('regex_replace', '^', 'gemini://') | join(' | ') }}"
+          - "cgit    : https://{{ cgit_domain }} | http://{{ onion_hostnames[cgit_onion_service] }} | http://{{ i2p_addresses[cgit_i2p_tunnel] }}"
+      tags: [always]
+
+  roles:
+    # Order matters: open the firewall, harden sshd, then bring the
+    # transports up before the services that advertise their addresses
+    - role: common
+      tags: [common]
+    - role: firewall
+      tags: [firewall]
+    - role: ssh_hardening
+      tags: [ssh]
+    - role: tor
+      tags: [tor]
+    - role: i2p
+      tags: [i2p]
+    - role: caddy
+      tags: [caddy, web, cgit]
+    - role: website
+      tags: [web]
+    - role: gemini
+      tags: [gemini]
+    - role: cgit
+      tags: [cgit]

@@ -1,0 +1,29 @@
+# {{ ansible_managed }}
+[Unit]
+Description=FastCGI wrapper for cgit and git-http-backend
+Requires={{ cgit_fcgiwrap_service }}.socket
+After={{ cgit_fcgiwrap_service }}.socket
+
+[Service]
+ExecStart={{ cgit_fcgiwrap_binary }}
+User={{ cgit_user }}
+Group={{ cgit_group }}
+
+# The CGI only ever reads repositories; the cache is its one writable path.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallFilter=@system-service
+ReadWritePaths={{ cgit_cache_dir }}
+
+[Install]
+WantedBy=multi-user.target

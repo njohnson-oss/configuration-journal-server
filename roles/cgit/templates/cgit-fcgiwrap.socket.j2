@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+[Unit]
+Description=FastCGI socket for cgit
+
+[Socket]
+ListenStream={{ cgit_socket }}
+SocketUser={{ caddy_user }}
+SocketGroup={{ caddy_group }}
+SocketMode=0660
+
+[Install]
+WantedBy=sockets.target

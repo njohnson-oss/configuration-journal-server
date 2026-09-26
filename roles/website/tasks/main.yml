@@ -1,0 +1,36 @@
+---
+- name: Create the document root directory
+  ansible.builtin.file:
+    path: "{{ website_root }}"
+    state: directory
+    owner: root
+    group: "{{ caddy_group }}"
+    mode: "0750"
+
+- name: Deploy the supplied site content
+  ansible.builtin.copy:
+    src: "{{ website_source }}/"
+    dest: "{{ website_root }}/"
+    owner: root
+    group: "{{ caddy_group }}"
+    mode: "0640"
+    directory_mode: "0750"
+  when: website_source | length > 0
+
+- name: Deploy a placeholder page when no content was supplied
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ website_root }}/index.html"
+    owner: root
+    group: "{{ caddy_group }}"
+    mode: "0640"
+  when: website_source | length == 0
+
+- name: Write the vhost
+  ansible.builtin.template:
+    src: website.caddy.j2
+    dest: "{{ website_vhost_path }}"
+    owner: root
+    group: "{{ caddy_group }}"
+    mode: "0640"
+  notify: reload caddy

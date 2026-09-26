@@ -1,0 +1,6 @@
+---
+- name: Restart tor
+  ansible.builtin.systemd_service:
+    name: "{{ tor_service }}"
+    state: restarted
+  listen: restart tor

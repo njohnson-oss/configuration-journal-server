@@ -1,0 +1,17 @@
+---
+# ═══════════════════════════════════════════════════════════════════════
+#  Crypto policy for the capsule. Role vars: not settable from inventory.
+# ═══════════════════════════════════════════════════════════════════════
+
+# Matches the clearnet minimum TLS version in vars/policy.yml.
+gemini_only_tls13: true
+
+# Self-signed material generated for any hostname not listed in
+# gemini_certificates. Gemini is trust-on-first-use, so a long life is
+# important. Each hostname gets its own key and certificate. Clients
+# check the name against the certificate, and with separate certificates,
+# changing one address doesn't break the certificates clients have
+# already saved for the others. (The addresses are published on the
+# capsule, so this is not about keeping the transports unlinked.)
+gemini_cert_days: "+3650d"
+gemini_key_type: Ed25519

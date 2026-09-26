@@ -1,0 +1,39 @@
+# {{ ansible_managed }}
+
+css=/static/cgit.css
+logo=/static/cgit.png
+favicon=/static/favicon.ico
+
+root-title={{ cgit_root_title }}
+root-desc={{ cgit_root_desc }}
+
+virtual-root=/
+remove-suffix=1
+snapshots={{ cgit_snapshots }}
+cache-root={{ cgit_cache_dir }}
+cache-size={{ cgit_cache_size }}
+
+enable-index-owner=1
+enable-commit-graph=1
+enable-log-filecount=1
+enable-log-linecount=1
+enable-git-config=0
+max-stats=year
+section-sort=1
+
+# Clones go through git-http-backend (smart HTTP), not cgit's dumb path.
+enable-http-clone=0
+
+# The clone URLs advertised on each repository page, one per transport.
+clone-url=https://{{ cgit_domain }}/$CGIT_REPO_URL.git http://{{ onion_hostnames[cgit_onion_service] }}/$CGIT_REPO_URL.git http://{{ i2p_addresses[cgit_i2p_tunnel] }}/$CGIT_REPO_URL.git
+
+{% for repo in cgit_repositories %}
+repo.url={{ repo.name }}
+repo.path={{ cgit_repo_root }}/{{ repo.name }}.git
+repo.desc={{ repo.description | default('') }}
+repo.owner={{ repo.owner | default(cgit_default_owner) }}
+{% if repo.section is defined %}
+repo.section={{ repo.section }}
+{% endif %}
+
+{% endfor %}

@@ -1,0 +1,6 @@
+---
+- name: Restart i2pd
+  ansible.builtin.systemd_service:
+    name: "{{ i2p_service }}"
+    state: restarted
+  listen: restart i2pd

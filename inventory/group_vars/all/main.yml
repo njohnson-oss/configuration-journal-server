@@ -1,0 +1,166 @@
+---
+# ═══════════════════════════════════════════════════════════════════════
+#  Every deployment-specific value lives here. Roles carry only
+#  implementation defaults (paths, package names) in their defaults/.
+#
+#  Crypto policy and the ports the stack is pinned to are deliberately
+#  NOT here: they are invariants, and live in vars/policy.yml and the
+#  roles' vars/main.yml, where inventory cannot override them. Changing
+#  one needs an explicit -e for a single run.
+#
+#  Using this file
+#  ───────────────
+#
+#   1. Replace every line marked CHANGE ME with your own values. Anything
+#      not marked has a working default and can stay as it is.
+#   2. Point the "journal" host in inventory/hosts.yml at your server.
+#   3. Put the onion service keys and the I2P destination keys under
+#      secrets_dir (see "Material you supply at deploy time" in
+#      README.md). The playbook derives the .onion and .b32.i2p addresses
+#      from them, so you never type an address in here.
+#   4. Create DNS A/AAAA records for web_domain, each of web_aliases and
+#      cgit_domain, all pointing at the server, before the first run.
+#      Caddy's ACME challenge fails without them.
+#   5. Run, supplying your SSH key on the command line:
+#        ansible-galaxy install -r requirements.yml
+#        ansible-playbook site.yml \
+#          -e '{"admin_authorized_keys":["ssh-ed25519 AAAA... you@laptop"]}'
+#   6. After the first run, set ansible_user / ansible_port in
+#      inventory/hosts.yml to admin_user / ssh_port.
+# ═══════════════════════════════════════════════════════════════════════
+
+# ── Administration ────────────────────────────────────────────────────
+admin_user: deploy
+admin_authorized_keys: []          # REQUIRED — list of SSH public keys.
+                                   # Supply at deploy time, e.g.
+                                   # -e '{"admin_authorized_keys":["ssh-ed25519 AAAA..."]}'
+
+# Where the user stores the deployment files: onion service keys, I2P
+# destination keys, optional TLS/Gemini certificates.
+#
+# Never committed — see .gitignore.
+secrets_dir: "{{ playbook_dir }}/secrets"
+
+# ── Public names ──────────────────────────────────────────────────────
+web_domain: example.com                # CHANGE ME — the site's main domain
+web_aliases: ["www.{{ web_domain }}"]  # extra names that serve the site;
+                                       # [] for none
+cgit_domain: "git.{{ web_domain }}"
+gemini_domain: "{{ web_domain }}"
+acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
+                                           # registered with the ACME CA
+
+# ── Clearnet ports ────────────────────────────────────────────────────
+# 80, 443 and 1965 are fixed in vars/policy.yml: ACME HTTP-01 and the
+# Gemini scheme both expect them, and the firewall and the servers have
+# to agree. They are referenced below as web_http_port, web_https_port
+# and gemini_port.
+
+# ── Loopback ports the hidden transports forward to ───────────────────
+# Nothing listens on these outside 127.0.0.1; the firewall never sees them.
+web_hidden_port: 8080
+cgit_hidden_port: 8081
+gemini_hidden_port: 1966
+
+# ── SSH ───────────────────────────────────────────────────────────────
+ssh_port: 22
+ssh_allowed_users: [ "{{ admin_user }}" ]
+
+# ── I2P ───────────────────────────────────────────────────────────────
+# This node publishes destinations either way. Setting a port here also
+# makes it relay traffic for other routers: i2pd binds it for NTCP2 and
+# SSU2, and the firewall opens it to match. Leave it unset and i2pd picks
+# its own port, which stays closed — no inbound transit.
+i2p_router_port: ~
+
+# Bandwidth and transit. Each of these is written to i2pd.conf only when
+# set: left as ~, i2pd applies its own default.
+
+# Router bandwidth limit. L is 32 KB/s, O 256, P 2048, X uncapped; a
+# plain integer is read as KB/s, and a suffixed one (100mb) as a rate.
+# It caps this router's total throughput, transit and your own visitors
+# together.
+i2p_bandwidth: L
+
+# Max % of i2p_bandwidth that transit may consume, 0-100. This is the
+# setting that keeps relayed traffic from crowding out your own: raise
+# i2p_bandwidth for the site's benefit and cap share to decide how much
+# strangers get. i2pd default: 100.
+i2p_share: ~
+
+# Maximum number of tunnels carried for other routers. i2pd default: 10000.
+i2p_transit_tunnels: ~
+
+# Decline transit outright. The router's own tunnels stay connected, but
+# it relays nothing for strangers. i2pd default: false.
+i2p_notransit: false
+
+# ── Tor onion services ────────────────────────────────────────────────
+# key_dir must contain hs_ed25519_secret_key. Tor recreates
+# hs_ed25519_public_key and hostname from it on the host.
+web_onion_service: web
+cgit_onion_service: cgit
+tor_onion_services:
+  - name: web  # also carries the Gemini capsule in this config
+    key_dir: "{{ secrets_dir }}/onion/web"
+    ports:
+      - { virtual: "{{ web_http_port }}", target: "127.0.0.1:{{ web_hidden_port }}" }
+      - { virtual: "{{ gemini_port }}", target: "127.0.0.1:{{ gemini_hidden_port }}" }
+  - name: cgit
+    key_dir: "{{ secrets_dir }}/onion/cgit"
+    ports:
+      - { virtual: "{{ web_http_port }}", target: "127.0.0.1:{{ cgit_hidden_port }}" }
+
+# ── I2P server tunnels ────────────────────────────────────────────────
+# keyfile is an i2pd destination key (.dat). The .b32.i2p address is
+# derived from it on the host.
+web_i2p_tunnel: web
+cgit_i2p_tunnel: cgit
+gemini_i2p_tunnel: gemini
+i2p_server_tunnels:
+  - name: web
+    keyfile: "{{ secrets_dir }}/i2p/web.dat"
+    target: 127.0.0.1
+    port: "{{ web_hidden_port }}"
+  - name: gemini
+    keyfile: "{{ secrets_dir }}/i2p/gemini.dat"
+    target: 127.0.0.1
+    port: "{{ gemini_hidden_port }}"
+  - name: cgit
+    keyfile: "{{ secrets_dir }}/i2p/cgit.dat"
+    target: 127.0.0.1
+    port: "{{ cgit_hidden_port }}"
+
+# ── Gemini capsule ────────────────────────────────────────────────────
+# onion_hostnames and i2p_addresses are resolved in site.yml's pre_tasks
+# from the supplied keys.
+gemini_onion_service: "{{ web_onion_service }}"
+gemini_hostnames: >-
+  {{ [gemini_domain,
+      onion_hostnames[gemini_onion_service],
+      i2p_addresses[gemini_i2p_tunnel]] | unique }}
+
+# User-supplied Gemini certificates, keyed by hostname. Any hostname not
+# listed here gets a long-lived self-signed cert generated by Ansible.
+gemini_certificates: {}
+#   example.com:
+#     cert: "{{ secrets_dir }}/gemini/example.com.crt"
+#     key:  "{{ secrets_dir }}/gemini/example.com.key"
+
+# ── Content ───────────────────────────────────────────────────────────
+# Local directories rsynced onto the host. Leave empty to deploy a
+# placeholder page so the deployment is verifiable before you have content.
+website_source: ""
+capsule_source: ""
+
+# ── Git repositories published on cgit ───────────────────────────
+cgit_root_title: "{{ web_domain }} repositories"
+cgit_root_desc: "public git repositories"
+cgit_default_owner: "{{ admin_user }}"
+cgit_repositories: []
+#   - name: myproject
+#     description: "My description"
+#     owner: bob
+#     section: utilities
+#     source: "https://github.com/bob/myproject.git"   # optional; omit
+#                                                      # for an empty bare repo

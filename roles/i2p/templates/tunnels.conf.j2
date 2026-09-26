@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+{% for tunnel in i2p_server_tunnels %}
+# {{ tunnel.name }} — {{ i2p_addresses[tunnel.name] }}
+[{{ tunnel.name }}]
+type = server
+host = {{ tunnel.target }}
+port = {{ tunnel.port }}
+keys = {{ tunnel.name }}.dat
+signaturetype = {{ tunnel.signature_type | default(i2p_tunnel_signature_type) }}
+
+{% endfor %}

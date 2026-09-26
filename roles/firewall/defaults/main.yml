@@ -1,0 +1,5 @@
+---
+# Implementation details only. The firewall rules themselves are derived
+# in vars/main.yml.
+firewall_packages: [nftables]
+firewall_config_path: /etc/nftables.conf

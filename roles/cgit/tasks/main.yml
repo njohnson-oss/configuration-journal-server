@@ -1,0 +1,111 @@
+---
+- name: Create the cgit group
+  ansible.builtin.group:
+    name: "{{ cgit_group }}"
+    system: true
+    state: present
+
+- name: Create the cgit service user
+  ansible.builtin.user:
+    name: "{{ cgit_user }}"
+    group: "{{ cgit_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    home: "{{ cgit_repo_root }}"
+    create_home: false
+    state: present
+
+- name: Install cgit and the FastCGI wrapper
+  ansible.builtin.apt:
+    name: "{{ cgit_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Disable the packaged fcgiwrap units
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+    masked: true
+  loop:
+    - fcgiwrap.socket
+    - fcgiwrap.service
+
+- name: Create the repository and cache directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ cgit_user }}"
+    group: "{{ cgit_group }}"
+    mode: "0755"
+  loop:
+    - "{{ cgit_repo_root }}"
+    - "{{ cgit_cache_dir }}"
+
+# ── Repositories ──────────────────────────────────────────────────────
+- name: Mirror the repositories that have an upstream
+  ansible.builtin.git:
+    repo: "{{ item.source }}"
+    dest: "{{ cgit_repo_root }}/{{ item.name }}.git"
+    bare: true
+    update: true
+    version: "{{ item.version | default('HEAD') }}"
+  become_user: "{{ cgit_user }}"
+  loop: "{{ cgit_repositories | selectattr('source', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Initialise the repositories that have no upstream
+  ansible.builtin.command:
+    cmd: >-
+      git init --bare --object-format={{ cgit_object_format }}
+      --initial-branch={{ cgit_initial_branch }} {{ cgit_repo_root }}/{{ item.name }}.git
+    creates: "{{ cgit_repo_root }}/{{ item.name }}.git/HEAD"
+  become_user: "{{ cgit_user }}"
+  loop: "{{ cgit_repositories | rejectattr('source', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Write the cgit configuration
+  ansible.builtin.template:
+    src: cgitrc.j2
+    dest: "{{ cgit_config_path }}"
+    owner: root
+    group: "{{ cgit_group }}"
+    mode: "0644"
+
+# ── FastCGI wrapper ───────────────────────────────────────────────────
+- name: Install the socket unit
+  ansible.builtin.template:
+    src: cgit-fcgiwrap.socket.j2
+    dest: "/etc/systemd/system/{{ cgit_fcgiwrap_service }}.socket"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart cgit fcgiwrap
+
+- name: Install the service unit
+  ansible.builtin.template:
+    src: cgit-fcgiwrap.service.j2
+    dest: "/etc/systemd/system/{{ cgit_fcgiwrap_service }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart cgit fcgiwrap
+
+- name: Enable the FastCGI socket
+  ansible.builtin.systemd_service:
+    name: "{{ cgit_fcgiwrap_service }}.socket"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Write the vhost
+  ansible.builtin.template:
+    src: cgit.caddy.j2
+    dest: "{{ cgit_vhost_path }}"
+    owner: root
+    group: "{{ caddy_group }}"
+    mode: "0640"
+  notify: reload caddy

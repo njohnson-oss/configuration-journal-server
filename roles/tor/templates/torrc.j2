@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+# This relay is a pure onion service host: no SOCKS port, no client use.
+
+SocksPort 0
+Log {{ tor_log }}
+DataDirectory {{ tor_service_root }}
+
+{% for service in tor_onion_services %}
+# {{ service.name }} — {{ onion_hostnames[service.name] }}
+HiddenServiceDir {{ tor_service_root }}/{{ service.name }}
+HiddenServiceVersion 3
+{% for port in service.ports %}
+HiddenServicePort {{ port.virtual }} {{ port.target }}
+{% endfor %}
+
+{% endfor %}

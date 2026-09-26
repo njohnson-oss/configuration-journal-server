@@ -1,0 +1,30 @@
+---
+cgit_packages: [cgit, fcgiwrap, git]
+
+cgit_user: cgit
+cgit_group: cgit
+cgit_repo_root: /srv/git
+cgit_cache_dir: /var/cache/cgit
+cgit_config_path: /etc/cgitrc
+
+cgit_cgi: /usr/lib/cgit/cgit.cgi
+cgit_static_dir: /usr/share/cgit
+cgit_git_http_backend: /usr/lib/git-core/git-http-backend
+
+cgit_socket: /run/cgit-fcgiwrap.sock
+cgit_fcgiwrap_binary: /usr/sbin/fcgiwrap
+cgit_fcgiwrap_service: cgit-fcgiwrap
+
+cgit_vhost_path: "{{ caddy_sites_dir }}/20-cgit.caddy"
+cgit_log: "{{ caddy_log_dir }}/cgit.log"
+cgit_hsts: "max-age=31536000; includeSubDomains"
+
+cgit_snapshots: "tar.gz zip"
+cgit_cache_size: 1000
+
+# Git uses SHA1 by default, but SHA1 is weak. Repositories created here
+# should use SHA256.
+cgit_object_format: sha256
+
+# Branch that repositories without an upstream are initialized to.
+cgit_initial_branch: main

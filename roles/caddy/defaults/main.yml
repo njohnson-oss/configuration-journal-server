@@ -1,0 +1,34 @@
+---
+caddy_packages: [caddy]
+caddy_service: caddy
+caddy_user: caddy
+caddy_group: caddy
+caddy_binary: /usr/bin/caddy
+caddy_config_path: /etc/caddy/Caddyfile
+caddy_sites_dir: /etc/caddy/sites.d
+caddy_log_dir: /var/log/caddy
+
+# Must not be DEBUG. Debug-level lines such as Go's "TLS handshake error
+# from <ip>:<port>" put the address in the message text, where the field
+# filter below cannot reach it. The tasks refuse DEBUG.
+caddy_log_level: INFO
+
+# Deleted from every log entry. These headers are client-supplied and can
+# carry a visitor's real IP address.
+caddy_log_redacted_fields:
+  - request>remote_ip
+  - request>client_ip
+  - request>headers>X-Forwarded-For
+  - request>headers>X-Real-Ip
+  - request>headers>Forwarded
+
+# deb822_repository depends on python3-debian, so it is installed
+# before the Caddy repository.
+caddy_repo_packages: [python3-debian]
+caddy_repo_key_url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
+caddy_repo_keyring: /etc/apt/keyrings/caddy-stable.asc
+caddy_repo_uri: https://dl.cloudsmith.io/public/caddy/stable/deb/debian
+caddy_repo_suite: any-version
+caddy_repo_component: main
+
+caddy_protocols: [h1, h2, h3]

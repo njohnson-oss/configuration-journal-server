@@ -1,0 +1,84 @@
+---
+# The redaction filter deletes structured IP fields, but debug lines
+# carry addresses inside the message itself. Catch that here rather
+# than in a log file.
+- name: Refuse a log level that records visitor addresses
+  ansible.builtin.assert:
+    that:
+      - caddy_log_level | upper != 'DEBUG'
+    fail_msg: >-
+      caddy_log_level is DEBUG — debug lines include visitor IP addresses
+      in the message text, which the redaction filter cannot remove.
+    quiet: true
+
+- name: Install Caddy repository tooling
+  ansible.builtin.apt:
+    name: "{{ caddy_repo_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create the apt keyring directory
+  ansible.builtin.file:
+    path: "{{ caddy_repo_keyring | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Fetch the Caddy package signing key
+  ansible.builtin.get_url:
+    url: "{{ caddy_repo_key_url }}"
+    dest: "{{ caddy_repo_keyring }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure the Caddy repository
+  ansible.builtin.deb822_repository:
+    name: caddy-stable
+    types: [deb]
+    uris: "{{ caddy_repo_uri }}"
+    suites: ["{{ caddy_repo_suite }}"]
+    components: ["{{ caddy_repo_component }}"]
+    signed_by: "{{ caddy_repo_keyring }}"
+    state: present
+  register: caddy_repo
+
+- name: Install Caddy
+  ansible.builtin.apt:
+    name: "{{ caddy_packages }}"
+    state: present
+    update_cache: "{{ caddy_repo.changed }}"
+
+- name: Create the vhost directory
+  ansible.builtin.file:
+    path: "{{ caddy_sites_dir }}"
+    state: directory
+    owner: root
+    group: "{{ caddy_group }}"
+    mode: "0750"
+
+- name: Create the log directory
+  ansible.builtin.file:
+    path: "{{ caddy_log_dir }}"
+    state: directory
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: "0750"
+
+- name: Write the global configuration
+  ansible.builtin.template:
+    src: Caddyfile.j2
+    dest: "{{ caddy_config_path }}"
+    owner: root
+    group: "{{ caddy_group }}"
+    mode: "0640"
+    validate: "{{ caddy_binary }} validate --adapter caddyfile --config %s"
+  notify: reload caddy
+
+- name: Enable Caddy
+  ansible.builtin.systemd_service:
+    name: "{{ caddy_service }}"
+    enabled: true
+    state: started

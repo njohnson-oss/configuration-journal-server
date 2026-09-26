@@ -1,0 +1,67 @@
+---
+- name: Install i2pd
+  ansible.builtin.apt:
+    name: "{{ i2p_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Look for the destination keys on the controller
+  ansible.builtin.stat:
+    path: "{{ item.keyfile }}"
+  loop: "{{ i2p_server_tunnels }}"
+  loop_control:
+    label: "{{ item.name }}"
+  delegate_to: localhost
+  become: false
+  register: i2p_supplied_keys
+
+- name: Refuse to deploy without every destination key
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+    fail_msg: >-
+      missing {{ item.item.keyfile }} — the destination key must exist on
+      the controller before deploy, and its contents must persist across
+      rebuilds, or the .b32.i2p address changes every time.
+    quiet: true
+  loop: "{{ i2p_supplied_keys.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Install the destination keys
+  ansible.builtin.copy:
+    src: "{{ item.keyfile }}"
+    dest: "{{ i2p_data_dir }}/{{ item.name }}.dat"
+    owner: "{{ i2p_user }}"
+    group: "{{ i2p_group }}"
+    mode: "0600"
+  loop: "{{ i2p_server_tunnels }}"
+  loop_control:
+    label: "{{ item.name }}"
+  no_log: true
+  notify: restart i2pd
+
+- name: Write the router configuration
+  ansible.builtin.template:
+    src: i2pd.conf.j2
+    dest: "{{ i2p_config_path }}"
+    owner: root
+    group: "{{ i2p_group }}"
+    mode: "0640"
+  notify: restart i2pd
+
+- name: Write the server tunnels
+  ansible.builtin.template:
+    src: tunnels.conf.j2
+    dest: "{{ i2p_tunnels_path }}"
+    owner: root
+    group: "{{ i2p_group }}"
+    mode: "0640"
+  notify: restart i2pd
+
+- name: Enable i2pd
+  ansible.builtin.systemd_service:
+    name: "{{ i2p_service }}"
+    enabled: true
+    state: started
