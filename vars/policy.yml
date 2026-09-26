@@ -1,12 +1,13 @@
 ---
 # These are play vars, so inventory and group_vars cannot modify them.
-# Three kinds of value live here:
+# Four kinds of value live here:
 #
 # 1. Numbers that several roles have to agree on and that are not free
 #    to choose because something outside this playbook expects them.
 # 2. The minimum TLS version, which is a promise the playbook makes
 #    rather than a preference — Caddy implements it for HTTP, Agate for Gemini.
 # 3. TLS protocols to force the use of hybrid PQ cryptography.
+# 4. The header written at the top of every templated file.
 #
 # Overriding any of these needs an explicit -e. That is deliberate. It
 # is visible, it does not persist, and it voids the guarantees in the README.
@@ -24,3 +25,6 @@ tls_protocol_max: tls1.3
 # Hybrid PQ key agreement only (ML-KEM-768 + X25519).
 tls_curves:
   - x25519mlkem768
+
+# Header comment for every templated file.
+ansible_managed: "Managed by Ansible (configuration-journal-server), do not edit"
