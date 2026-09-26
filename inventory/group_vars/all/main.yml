@@ -13,7 +13,7 @@
 #
 #   1. Replace every line marked CHANGE ME with your own values. Anything
 #      not marked has a working default and can stay as it is.
-#   2. Point the "journal" host in inventory/hosts.yml at your server.
+#   2. Point the "journal-server" host in inventory/hosts.yml at your server.
 #   3. Put the onion service keys and the I2P destination keys under
 #      secrets_dir (see "Material you supply at deploy time" in
 #      README.md). The playbook derives the .onion and .b32.i2p addresses
