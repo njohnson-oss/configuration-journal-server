@@ -1,2 +1,5 @@
+# The default root path for Ansible config files on the controller
+.ansible/
+
 secrets/
 __pycache__/

@@ -1,0 +1,56 @@
+---
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Install tools
+        run: pip install ansible-lint ruff
+
+      - name: Install collections
+        run: ansible-galaxy collection install -r requirements.yml
+
+      # Also runs `ansible-playbook --syntax-check` on site.yml.
+      - name: ansible-lint
+        run: ansible-lint
+
+      - name: ruff (filter plugins)
+        run: ruff check filter_plugins
+
+      # ansible-lint does not look inside .j2 files. This parses each one
+      # without rendering it, so it catches syntax errors, not undefined
+      # variables or filters.
+      - name: Jinja template syntax
+        shell: python
+        run: |
+          import pathlib, sys
+          import jinja2
+
+          env = jinja2.Environment(extensions=["jinja2.ext.do", "jinja2.ext.loopcontrols"])
+          failed = False
+          for path in sorted(pathlib.Path("roles").glob("*/templates/**/*.j2")):
+              try:
+                  env.parse(path.read_text(), filename=str(path))
+              except jinja2.TemplateSyntaxError as exc:
+                  print(f"::error file={path},line={exc.lineno}::{exc.message}")
+                  failed = True
+          sys.exit(failed)

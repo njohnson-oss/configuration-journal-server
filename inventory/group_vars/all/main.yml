@@ -64,7 +64,7 @@ gemini_hidden_port: 1966
 
 # ── SSH ───────────────────────────────────────────────────────────────
 ssh_port: 22
-ssh_allowed_users: [ "{{ admin_user }}" ]
+ssh_allowed_users: ["{{ admin_user }}"]
 
 # ── I2P ───────────────────────────────────────────────────────────────
 # This node publishes destinations either way. Setting a port here also
