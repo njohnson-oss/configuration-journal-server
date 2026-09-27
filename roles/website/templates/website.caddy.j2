@@ -21,7 +21,7 @@
 # Plain HTTP bound to the loopback: both networks encrypt the transport
 # themselves and the address *is* the key, so TLS would add nothing and
 # HSTS would be wrong here.
-http://{{ onion_hostnames[web_onion_service] }}:{{ web_hidden_port }}, http://{{ i2p_addresses[web_i2p_tunnel] }}:{{ web_hidden_port }} {
+http://{{ onion_hostname }}:{{ web_hidden_port }}, http://{{ i2p_addresses.web }}:{{ web_hidden_port }} {
 	bind 127.0.0.1
 	import security_headers
 

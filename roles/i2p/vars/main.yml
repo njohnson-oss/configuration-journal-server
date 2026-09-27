@@ -2,3 +2,10 @@
 # Signature type i2pd uses when generating a destination key, which
 # occurs when it cannot open the configured .dat file.
 i2p_tunnel_signature_type: 7
+
+# One server tunnel per service, each forwarding to that service's
+# loopback port.
+i2p_server_tunnels:
+  - { name: web, port: "{{ web_hidden_port }}" }
+  - { name: gemini, port: "{{ gemini_hidden_port }}" }
+  - { name: cgit, port: "{{ cgit_hidden_port }}" }

@@ -3,7 +3,8 @@ tor_packages: [tor]
 tor_service: tor
 tor_user: debian-tor
 tor_config_path: /etc/tor/torrc
-tor_service_root: /var/lib/tor
+tor_data_dir: /var/lib/tor
+tor_service_dir: "{{ tor_data_dir }}/onion_service"
 
 # The only file the user has to supply for a v3 service: the address is
 # the key. Tor writes hs_ed25519_public_key and hostname itself from

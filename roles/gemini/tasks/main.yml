@@ -266,7 +266,6 @@
     owner: root
     group: "{{ gemini_group }}"
   loop: "{{ gemini_hostnames }}"
-  when: gemini_hostnames | length > 1
 
 # ── Service ───────────────────────────────────────────────────────────
 - name: Write the systemd unit

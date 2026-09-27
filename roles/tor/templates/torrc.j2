@@ -3,14 +3,11 @@
 
 SocksPort 0
 Log {{ tor_log }}
-DataDirectory {{ tor_service_root }}
+DataDirectory {{ tor_data_dir }}
 
-{% for service in tor_onion_services %}
-# {{ service.name }} — {{ onion_hostnames[service.name] }}
-HiddenServiceDir {{ tor_service_root }}/{{ service.name }}
+# {{ onion_hostname }}
+HiddenServiceDir {{ tor_service_dir }}
 HiddenServiceVersion 3
-{% for port in service.ports %}
-HiddenServicePort {{ port.virtual }} {{ port.target }}
-{% endfor %}
-
+{% for port in tor_onion_ports %}
+HiddenServicePort {{ port }}
 {% endfor %}

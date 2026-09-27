@@ -23,7 +23,7 @@ ExecStart={{ gemini_binary }} \
 {% for host in gemini_hostnames %}
 	--hostname {{ host }} \
 {% endfor %}
-	--content {{ (gemini_hostnames | length > 1) | ternary(gemini_root, gemini_content_dir) }} \
+	--content {{ gemini_root }} \
 	--certs {{ gemini_cert_dir }} \
 	--lang {{ gemini_lang }}{% if gemini_only_tls13 %} \
 	--only-tls13

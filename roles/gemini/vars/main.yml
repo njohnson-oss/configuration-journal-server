@@ -1,6 +1,7 @@
 ---
 # ═══════════════════════════════════════════════════════════════════════
-#  Crypto policy for the capsule. Role vars: not settable from inventory.
+#  Crypto policy and names for the capsule. Role vars: not settable
+#  from inventory.
 # ═══════════════════════════════════════════════════════════════════════
 
 # Matches the clearnet minimum TLS version in vars/policy.yml.
@@ -15,3 +16,10 @@ gemini_only_tls13: true
 # capsule, so this is not about keeping the transports unlinked.)
 gemini_cert_days: "+3650d"
 gemini_key_type: Ed25519
+
+# The names the capsule answers to, one per transport: its clearnet
+# domain, the onion, and its own I2P destination.
+gemini_hostnames:
+  - "{{ gemini_domain }}"
+  - "{{ onion_hostname }}"
+  - "{{ i2p_addresses.gemini }}"

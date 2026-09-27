@@ -24,7 +24,7 @@ I2P destination.
 | `roles/common` | packages, admin account, unattended upgrades |
 | `roles/firewall` | nftables, default-deny inbound |
 | `roles/ssh_hardening` | PQ-only key exchange, key-only auth |
-| `roles/tor` | onion services from user-supplied keys |
+| `roles/tor` | the onion service, from a user-supplied key |
 | `roles/i2p` | i2pd server tunnels from user-supplied keys |
 | `roles/caddy` | global config, TLS policy, shared snippets |
 | `roles/website` | content + vhosts (clearnet, onion, I2P) |
@@ -53,12 +53,15 @@ I2P destination.
 
 ```
 secrets/
-├── onion/
-│   ├── web/hs_ed25519_secret_key
-│   └── cgit/hs_ed25519_secret_key
+├── onion/hs_ed25519_secret_key
 ├── i2p/{web.dat,gemini.dat,cgit.dat}
 └── gemini/  # optional; self-signed certs are generated otherwise
 ```
+
+**One onion.** The website, capsule and cgit share a single onion:
+the capsule on port 1965, and cgit at `<cgit_onion_subdomain>.<onion>`.
+I2P has no equivalent — a `.b32.i2p` address takes no subdomains — so
+each service keeps its own I2P destination.
 
 **Onion keys.** Only `hs_ed25519_secret_key` is needed: the playbook
 computes the `.onion` address from it on the controller
@@ -67,8 +70,8 @@ directory, or use [`mkp224o`](https://github.com/cathugger/mkp224o) for
 a vanity prefix:
 
 ```sh
-mkp224o -d secrets/onion -n 1 mysite
-mv secrets/onion/mysiteXXXX.onion secrets/onion/web
+mkp224o -d secrets -n 1 mysite
+mv secrets/mysiteXXXX.onion secrets/onion
 ```
 
 Any `hs_ed25519_public_key` and `hostname` already on the host are

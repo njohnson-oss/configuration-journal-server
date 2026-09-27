@@ -30,28 +30,51 @@
         quiet: true
       tags: [always]
 
-    - name: Derive the onion address of each supplied hidden service key
+    - name: Refuse to deploy without the onion service secret key
+      ansible.builtin.assert:
+        that:
+          - (tor_onion_key_dir ~ '/hs_ed25519_secret_key') is file
+        fail_msg: >-
+          missing {{ tor_onion_key_dir }}/hs_ed25519_secret_key — keep the
+          secret key between rebuilds, or the .onion address changes every
+          time.
+        quiet: true
+      tags: [always]
+
+    - name: Derive the onion address from the supplied service key
       ansible.builtin.set_fact:
-        onion_hostnames: "{{ onion_hostnames | default({}) | combine({item.name: (item.key_dir ~ '/hs_ed25519_secret_key') | onion_address}) }}"
-      loop: "{{ tor_onion_services }}"
-      loop_control:
-        label: "{{ item.name }}"
+        onion_hostname: "{{ (tor_onion_key_dir ~ '/hs_ed25519_secret_key') | onion_address }}"
+      tags: [always]
+
+    - name: Name cgit's subdomain of the onion
+      ansible.builtin.set_fact:
+        cgit_onion_hostname: "{{ cgit_onion_subdomain }}.{{ onion_hostname }}"
+      tags: [always]
+
+    - name: Refuse to deploy without every I2P destination key
+      ansible.builtin.assert:
+        that:
+          - (i2p_key_dir ~ '/' ~ item ~ '.dat') is file
+        fail_msg: >-
+          missing {{ i2p_key_dir }}/{{ item }}.dat — the destination key must
+          exist on the controller before deploy, and its contents must persist
+          across rebuilds, or the .b32.i2p address changes every time.
+        quiet: true
+      loop: [web, gemini, cgit]
       tags: [always]
 
     - name: Derive the I2P destination address of each supplied tunnel key
       ansible.builtin.set_fact:
-        i2p_addresses: "{{ i2p_addresses | default({}) | combine({item.name: item.keyfile | i2p_b32}) }}"
-      loop: "{{ i2p_server_tunnels }}"
-      loop_control:
-        label: "{{ item.name }}"
+        i2p_addresses: "{{ i2p_addresses | default({}) | combine({item: (i2p_key_dir ~ '/' ~ item ~ '.dat') | i2p_b32}) }}"
+      loop: [web, gemini, cgit]
       tags: [always]
 
     - name: Show the addresses this host will answer to
       ansible.builtin.debug:
         msg:
-          - "web     : https://{{ web_domain }} | http://{{ onion_hostnames[web_onion_service] }} | http://{{ i2p_addresses[web_i2p_tunnel] }}"
-          - "gemini  : {{ gemini_hostnames | map('regex_replace', '^', 'gemini://') | join(' | ') }}"
-          - "cgit    : https://{{ cgit_domain }} | http://{{ onion_hostnames[cgit_onion_service] }} | http://{{ i2p_addresses[cgit_i2p_tunnel] }}"
+          - "web     : https://{{ web_domain }} | http://{{ onion_hostname }} | http://{{ i2p_addresses.web }}"
+          - "gemini  : gemini://{{ gemini_domain }} | gemini://{{ onion_hostname }} | gemini://{{ i2p_addresses.gemini }}"
+          - "cgit    : https://{{ cgit_domain }} | http://{{ cgit_onion_hostname }} | http://{{ i2p_addresses.cgit }}"
       tags: [always]
 
   roles:

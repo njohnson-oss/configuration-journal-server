@@ -6,52 +6,23 @@
     update_cache: true
     cache_valid_time: 3600
 
-- name: Register the onion service secret keys on the controller
-  ansible.builtin.stat:
-    path: "{{ item.key_dir }}/{{ tor_secret_key_filename }}"
-  loop: "{{ tor_onion_services }}"
-  loop_control:
-    label: "{{ item.name }}"
-  delegate_to: localhost
-  become: false
-  register: tor_supplied_keys
-
-- name: Refuse to deploy without every onion service secret key
-  ansible.builtin.assert:
-    that:
-      - item.stat.exists
-    fail_msg: >-
-      missing {{ item.item.key_dir }}/{{ tor_secret_key_filename }} —
-      keep the secret key between rebuilds, or the .onion address changes
-      every time.
-    quiet: true
-  loop: "{{ tor_supplied_keys.results }}"
-  loop_control:
-    label: "{{ item.item.name }}"
-
-- name: Create the onion service directories
+- name: Create the onion service directory
   ansible.builtin.file:
-    path: "{{ tor_service_root }}/{{ item.name }}"
+    path: "{{ tor_service_dir }}"
     state: directory
     owner: "{{ tor_user }}"
     group: "{{ tor_user }}"
     mode: "0700"
-  loop: "{{ tor_onion_services }}"
-  loop_control:
-    label: "{{ item.name }}"
 
-- name: Install the supplied onion service secret keys
+- name: Install the supplied onion service secret key
   ansible.builtin.copy:
-    src: "{{ item.key_dir }}/{{ tor_secret_key_filename }}"
-    dest: "{{ tor_service_root }}/{{ item.name }}/{{ tor_secret_key_filename }}"
+    src: "{{ tor_onion_key_dir }}/{{ tor_secret_key_filename }}"
+    dest: "{{ tor_service_dir }}/{{ tor_secret_key_filename }}"
     owner: "{{ tor_user }}"
     group: "{{ tor_user }}"
     mode: "0600"
-  loop: "{{ tor_onion_services }}"
-  loop_control:
-    label: "{{ item.name }}"
   no_log: true
-  register: tor_installed_keys
+  register: tor_installed_key
   notify: restart tor
 
 # Both are regenerated from the secret key at startup. Left in place
@@ -59,12 +30,10 @@
 # start on a public key that does not match the secret one.
 - name: Clear the files tor derives whenever the secret key changed
   ansible.builtin.file:
-    path: "{{ tor_service_root }}/{{ item.0.item.name }}/{{ item.1 }}"
+    path: "{{ tor_service_dir }}/{{ item }}"
     state: absent
-  loop: "{{ tor_installed_keys.results | product(tor_derived_filenames) | list }}"
-  loop_control:
-    label: "{{ item.0.item.name }}/{{ item.1 }}"
-  when: item.0 is changed
+  loop: "{{ tor_derived_filenames }}"
+  when: tor_installed_key is changed
   notify: restart tor
 
 - name: Write torrc
@@ -93,32 +62,22 @@
 - name: Apply the Tor configuration before reading back the addresses
   ansible.builtin.meta: flush_handlers
 
-- name: Wait for tor to publish each onion hostname
+- name: Wait for tor to publish the onion hostname
   ansible.builtin.wait_for:
-    path: "{{ tor_service_root }}/{{ item.name }}/hostname"
+    path: "{{ tor_service_dir }}/hostname"
     timeout: "{{ tor_hostname_timeout }}"
-  loop: "{{ tor_onion_services }}"
-  loop_control:
-    label: "{{ item.name }}"
 
-- name: Read back the published onion hostnames
+- name: Read back the published onion hostname
   ansible.builtin.slurp:
-    src: "{{ tor_service_root }}/{{ item.name }}/hostname"
-  loop: "{{ tor_onion_services }}"
-  loop_control:
-    label: "{{ item.name }}"
-  register: tor_published_hostnames
+    src: "{{ tor_service_dir }}/hostname"
+  register: tor_published_hostname
 
 - name: Check the published address against the one derived from the key
   ansible.builtin.assert:
     that:
-      - item.content | b64decode | trim == onion_hostnames[item.item.name]
+      - tor_published_hostname.content | b64decode | trim == onion_hostname
     fail_msg: >-
-      {{ item.item.name }}: tor published
-      {{ item.content | b64decode | trim }}, the controller derived
-      {{ onion_hostnames[item.item.name] }} from
-      {{ item.item.key_dir }}/{{ tor_secret_key_filename }}.
+      tor published {{ tor_published_hostname.content | b64decode | trim }},
+      the controller derived {{ onion_hostname }} from
+      {{ tor_onion_key_dir }}/{{ tor_secret_key_filename }}.
     quiet: true
-  loop: "{{ tor_published_hostnames.results }}"
-  loop_control:
-    label: "{{ item.item.name }}"

@@ -3,9 +3,9 @@
 # {{ tunnel.name }} — {{ i2p_addresses[tunnel.name] }}
 [{{ tunnel.name }}]
 type = server
-host = {{ tunnel.target }}
+host = 127.0.0.1
 port = {{ tunnel.port }}
 keys = {{ tunnel.name }}.dat
-signaturetype = {{ tunnel.signature_type | default(i2p_tunnel_signature_type) }}
+signaturetype = {{ i2p_tunnel_signature_type }}
 
 {% endfor %}

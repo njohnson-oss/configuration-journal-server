@@ -25,7 +25,7 @@ section-sort=1
 enable-http-clone=0
 
 # The clone URLs advertised on each repository page, one per transport.
-clone-url=https://{{ cgit_domain }}/$CGIT_REPO_URL.git http://{{ onion_hostnames[cgit_onion_service] }}/$CGIT_REPO_URL.git http://{{ i2p_addresses[cgit_i2p_tunnel] }}/$CGIT_REPO_URL.git
+clone-url=https://{{ cgit_domain }}/$CGIT_REPO_URL.git http://{{ cgit_onion_hostname }}/$CGIT_REPO_URL.git http://{{ i2p_addresses.cgit }}/$CGIT_REPO_URL.git
 
 {% for repo in cgit_repositories %}
 repo.url={{ repo.name }}
