@@ -16,7 +16,7 @@ I2P destination.
 
 | Path | Purpose |
 | --- | --- |
-| `site.yml` | the play: asserts inputs, resolves addresses, runs the roles |
+| `site.yml` | installs sudo and Python, then the main play: asserts inputs, resolves addresses, runs the roles |
 | `inventory/group_vars/all/main.yml` | **every** deployment-specific value |
 | `vars/policy.yml` | invariants, not user-modifiable settings |
 | `filter_plugins/tor.py` | derives a `.onion` address from a v3 service secret key |
