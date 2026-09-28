@@ -1,9 +1,12 @@
 ---
 # Validate the configuration before reloading, so a broken vhost from
-# any role never takes the running server down.
+# any role never takes the running server down. Validating opens the log
+# files, so it runs as Caddy's user, which is also what the server runs as.
 - name: Validate the Caddy configuration
   ansible.builtin.command:
     cmd: "{{ caddy_binary }} validate --adapter caddyfile --config {{ caddy_config_path }}"
+  become: true
+  become_user: "{{ caddy_user }}"
   changed_when: false
   listen: reload caddy
 

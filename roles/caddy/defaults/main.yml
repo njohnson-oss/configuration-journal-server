@@ -7,6 +7,7 @@ caddy_binary: /usr/bin/caddy
 caddy_config_path: /etc/caddy/Caddyfile
 caddy_sites_dir: /etc/caddy/sites.d
 caddy_log_dir: /var/log/caddy
+caddy_log: "{{ caddy_log_dir }}/caddy.log"
 
 # Must not be DEBUG. Debug-level lines such as Go's "TLS handshake error
 # from <ip>:<port>" put the address in the message text, where the field

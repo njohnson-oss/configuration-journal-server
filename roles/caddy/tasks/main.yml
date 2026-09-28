@@ -67,6 +67,18 @@
     group: "{{ caddy_group }}"
     mode: "0750"
 
+# `caddy validate` opens every log file the config names, and runs as
+# root here. A file it creates is root's, and Caddy then cannot open it.
+- name: Create the log file for Caddy
+  ansible.builtin.file:
+    path: "{{ caddy_log }}"
+    state: touch
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: "0600"
+    access_time: preserve
+    modification_time: preserve
+
 - name: Write the global configuration
   ansible.builtin.template:
     src: Caddyfile.j2

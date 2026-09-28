@@ -10,7 +10,7 @@
 		protocols {{ caddy_protocols | join(' ') }}
 	}
 	log {
-		output file {{ caddy_log_dir }}/caddy.log
+		output file {{ caddy_log }}
 		level {{ caddy_log_level }}
 		format filter {
 {% for field in caddy_log_redacted_fields %}
