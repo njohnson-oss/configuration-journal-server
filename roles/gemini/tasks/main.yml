@@ -237,6 +237,18 @@
     label: "{{ item.item.0 }}/{{ item.item.1.der }}"
 
 # ── Content ───────────────────────────────────────────────────────────
+# The deploy below mirrors the source, deleting whatever it lacks, so a
+# wrong or empty source would take the whole capsule down.
+- name: Refuse to mirror a capsule source with no index
+  ansible.builtin.assert:
+    that:
+      - (capsule_source ~ '/index.gmi') is file
+    fail_msg: >-
+      {{ capsule_source }}/index.gmi does not exist — refusing to mirror
+      what is probably the wrong or an empty directory over the capsule.
+    quiet: true
+  when: capsule_source | length > 0
+
 - name: Deploy the supplied capsule content
   ansible.posix.synchronize:
     src: "{{ capsule_source }}/"

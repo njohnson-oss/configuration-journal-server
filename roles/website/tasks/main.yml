@@ -14,6 +14,19 @@
     update_cache: true
     cache_valid_time: 3600
 
+# The deploy below mirrors the source, deleting whatever it lacks, so a
+# wrong or empty source would take the whole site down.
+- name: Refuse to mirror a site source with no index
+  ansible.builtin.assert:
+    that:
+      - website_index | map('regex_replace', '^', website_source ~ '/') | select('file') | list | length > 0
+    fail_msg: >-
+      {{ website_source }} has none of {{ website_index | join(', ') }} —
+      refusing to mirror what is probably the wrong or an empty directory
+      over the site.
+    quiet: true
+  when: website_source | length > 0
+
 - name: Deploy the supplied site content
   ansible.posix.synchronize:
     src: "{{ website_source }}/"
