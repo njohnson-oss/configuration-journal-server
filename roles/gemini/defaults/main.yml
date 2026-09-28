@@ -1,7 +1,7 @@
 ---
 # openssl converts the generated PEM material into the DER Agate expects;
 # python3-cryptography backs the community.crypto modules that generate it.
-gemini_packages: [openssl, python3-cryptography]
+gemini_packages: [openssl, python3-cryptography, rsync]
 
 # ── Agate ─────────────────────────────────────────────────────────────
 # Agate is Rust. It is not packaged for Debian, so the release binary is

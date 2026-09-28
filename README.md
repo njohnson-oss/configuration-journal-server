@@ -37,6 +37,7 @@ I2P destination.
   Also `pip install libnacl` (and libsodium itself, e.g. `apt install
   libsodium23`) — the `onion_address` filter derives the `.onion` from the
   service secret key with libsodium's Ed25519 scalar multiplication.
+  `rsync` too, which pushes the site and capsule content.
 * **Target:** Debian 12/13 with Python 3.
 * **OpenSSH ≥ 8.5** on the target for `sntrup761x25519-sha512@openssh.com`,
   or **≥ 9.9** for `mlkem768x25519-sha256`. The play probes `ssh -Q kex` and

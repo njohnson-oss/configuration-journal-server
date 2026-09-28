@@ -7,14 +7,21 @@
     group: "{{ caddy_group }}"
     mode: "0750"
 
+- name: Install the packages the role needs
+  ansible.builtin.apt:
+    name: "{{ website_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
 - name: Deploy the supplied site content
-  ansible.builtin.copy:
+  ansible.posix.synchronize:
     src: "{{ website_source }}/"
     dest: "{{ website_root }}/"
-    owner: root
-    group: "{{ caddy_group }}"
-    mode: "0640"
-    directory_mode: "0750"
+    delete: true
+    rsync_opts:
+      - "--chown=root:{{ caddy_group }}"
+      - "--chmod=D0750,F0640"
   when: website_source | length > 0
 
 - name: Deploy a placeholder page when no content was supplied
