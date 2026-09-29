@@ -21,8 +21,6 @@ The address is then, per rend-spec-v3 section 6:
 lower-cased, unpadded, with ".onion" appended.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import base64
 import ctypes
 import hashlib
@@ -33,8 +31,6 @@ try:
     import libnacl
 except (ImportError, OSError):  # libnacl raises OSError with no libsodium
     libnacl = None
-
-__metaclass__ = type
 
 SECRET_KEY_HEADER = b"== ed25519v1-secret: type0 =="
 SECRET_KEY_LENGTH = 96
@@ -54,16 +50,16 @@ def onion_address(keyfile):
         with open(keyfile, "rb") as handle:
             blob = handle.read()
     except OSError as exc:
-        raise AnsibleFilterError("cannot read onion key file %s: %s" % (keyfile, exc))
+        raise AnsibleFilterError(f"cannot read onion key file {keyfile}: {exc}")
 
     if not blob.startswith(SECRET_KEY_HEADER):
         raise AnsibleFilterError(
-            "%s is not a tor v3 secret key (bad header) — an offline or "
-            "encrypted key cannot be used here" % keyfile)
+            f"{keyfile} is not a tor v3 secret key (bad header) — an offline or "
+            "encrypted key cannot be used here")
 
     if len(blob) != SECRET_KEY_LENGTH:
         raise AnsibleFilterError(
-            "%s is %d bytes, expected %d" % (keyfile, len(blob), SECRET_KEY_LENGTH))
+            f"{keyfile} is {len(blob)} bytes, expected {SECRET_KEY_LENGTH}")
 
     scalar = blob[32:64]
 
@@ -72,14 +68,13 @@ def onion_address(keyfile):
     # writes is clamped, so this only ever fires on a corrupt or foreign file.
     if scalar[31] > 127:
         raise AnsibleFilterError(
-            "%s holds an unclamped scalar (byte 31 is 0x%02x) — tor never "
-            "writes such a key" % (keyfile, scalar[31]))
+            f"{keyfile} holds an unclamped scalar (byte 31 is 0x{scalar[31]:02x}) — tor never "
+            "writes such a key")
 
     public_key = ctypes.create_string_buffer(PUBLIC_KEY_LENGTH)
     if libnacl.nacl.crypto_scalarmult_ed25519_base_noclamp(public_key, scalar):
         raise AnsibleFilterError(
-            "%s holds a scalar that is zero mod L — it has no public key"
-            % keyfile)
+            f"{keyfile} holds a scalar that is zero mod L — it has no public key")
     public_key = public_key.raw
     checksum = hashlib.sha3_256(CHECKSUM_SALT + public_key + ONION_VERSION).digest()[:2]
     address = base64.b32encode(public_key + checksum + ONION_VERSION)

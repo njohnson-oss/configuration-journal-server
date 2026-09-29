@@ -12,14 +12,10 @@ The base32 address is the SHA-256 of those bytes, base32 encoded,
 lower-cased and stripped of padding.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import base64
 import hashlib
 
 from ansible.errors import AnsibleFilterError
-
-__metaclass__ = type
 
 DESTINATION_HEADER = 387
 
@@ -30,16 +26,16 @@ def i2p_b32(keyfile):
         with open(keyfile, "rb") as handle:
             blob = handle.read()
     except OSError as exc:
-        raise AnsibleFilterError("cannot read I2P key file %s: %s" % (keyfile, exc))
+        raise AnsibleFilterError(f"cannot read I2P key file {keyfile}: {exc}")
 
     if len(blob) < DESTINATION_HEADER:
-        raise AnsibleFilterError("%s is too short to be an I2P key file" % keyfile)
+        raise AnsibleFilterError(f"{keyfile} is too short to be an I2P key file")
 
     certificate_length = int.from_bytes(blob[385:DESTINATION_HEADER], "big")
     destination = blob[: DESTINATION_HEADER + certificate_length]
 
     if len(destination) < DESTINATION_HEADER + certificate_length:
-        raise AnsibleFilterError("%s is truncated: incomplete destination" % keyfile)
+        raise AnsibleFilterError(f"{keyfile} is truncated: incomplete destination")
 
     digest = hashlib.sha256(destination).digest()
     return base64.b32encode(digest).decode("ascii").lower().rstrip("=") + ".b32.i2p"
