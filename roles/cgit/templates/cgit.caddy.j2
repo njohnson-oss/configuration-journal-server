@@ -46,6 +46,7 @@
 {{ cgit_domain }} {
 	import pq_tls
 	header Strict-Transport-Security "{{ cgit_hsts }}"
+	header Onion-Location "http://{{ cgit_onion_hostname }}{uri}"
 	import cgit_app
 }
 
