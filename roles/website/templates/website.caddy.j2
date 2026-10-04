@@ -19,11 +19,10 @@
 }
 
 # ── Tor and I2P ───────────────────────────────────────────────────────
-# Plain HTTP bound to the loopback: both networks encrypt the transport
-# themselves and the address *is* the key, so TLS would add nothing and
-# HSTS would be wrong here.
+# Plain HTTP: both networks encrypt the transport themselves and the
+# address *is* the key, so TLS would add nothing and HSTS would be wrong
+# here.
 http://{{ onion_hostname }}, http://{{ i2p_addresses.web }} {
-	bind 127.0.0.1
 	import security_headers
 
 	root * {{ website_root }}
