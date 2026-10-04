@@ -3,3 +3,8 @@
 tor_onion_ports:
   - "{{ web_http_port }} 127.0.0.1:{{ web_http_port }}"
   - "{{ gemini_port }} 127.0.0.1:{{ gemini_port }}"
+
+# Reach the rendezvous point in one hop instead of three. The onion then
+# hides only the visitor, not this server, which the clearnet site gives
+# away anyway.
+tor_single_hop: true

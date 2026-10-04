@@ -2,6 +2,12 @@
 # This instance is a pure onion service host: no SOCKS port, no client use.
 
 SocksPort 0
+
+# One hop to the rendezvous point instead of three when tor_single_hop is
+# set. Tor requires both options to agree.
+HiddenServiceSingleHopMode {{ tor_single_hop | ternary(1, 0) }}
+HiddenServiceNonAnonymousMode {{ tor_single_hop | ternary(1, 0) }}
+
 Log {{ tor_log }}
 DataDirectory {{ tor_data_dir }}
 

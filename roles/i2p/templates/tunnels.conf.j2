@@ -7,5 +7,7 @@ host = 127.0.0.1
 port = {{ tunnel.port }}
 keys = {{ tunnel.name }}.dat
 signaturetype = {{ i2p_tunnel_signature_type }}
+inbound.length = {{ i2p_tunnel_length }}
+outbound.length = {{ i2p_tunnel_length }}
 
 {% endfor %}

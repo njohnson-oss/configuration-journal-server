@@ -10,3 +10,9 @@ i2p_server_tunnels:
   - { name: web, port: "{{ web_http_port }}" }
   - { name: gemini, port: "{{ gemini_port }}" }
   - { name: cgit, port: "{{ web_http_port }}" }
+
+# Hops in each of the site's inbound and outbound tunnels, instead of
+# i2pd's default of 3. At 0 this router is its own gateway, publishing its
+# identity and so its IP in the leasesets, which the clearnet site gives
+# away anyway; in exchange, visitors' round trips are half as long.
+i2p_tunnel_length: 0
