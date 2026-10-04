@@ -4,6 +4,11 @@ Ansible playbook that serves a website, Gemini capsule, and cgit
 instance, each reachable over the clearnet, a Tor onion address, and an
 I2P destination.
 
+**Note:** Preventing correlation of the clearnet transport with the
+hidden transports is not a design goal. The hidden transports are made
+available to offer clients anonymous means to connect, not to hide the
+server's IP.
+
 ```
                  ┌──────────── nftables: 22, 80, 443, 1965 ───┐
    clearnet ───► │  caddy (web, cgit)   ssh   agate (gemini)  │

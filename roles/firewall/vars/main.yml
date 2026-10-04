@@ -13,9 +13,8 @@
 # i2p_router_port set to work.
 firewall_i2p_ports: "{{ [i2p_router_port] if (i2p_router_port | default(none)) else [] }}"
 
-# Clearnet listeners: sshd, Caddy, Agate. The loopback ports the hidden
-# transports forward to are deliberately absent — nothing outside
-# 127.0.0.1 reaches them, so the firewall never needs to see them.
+# sshd, Caddy, Agate. Tor and I2P reach Caddy and Agate over the
+# loopback, which the ruleset accepts.
 firewall_allowed_tcp: >-
   {{ ([ssh_port, web_http_port, web_https_port, gemini_port] + firewall_i2p_ports)
      | map('string') | unique | list }}

@@ -7,10 +7,8 @@
   ansible.builtin.assert:
     that:
       - gemini_port | int > 1023
-      - gemini_hidden_port | int > 1023
     fail_msg: >-
-      gemini_port ({{ gemini_port }}) and gemini_hidden_port
-      ({{ gemini_hidden_port }}) must both be above 1023 — Agate runs
+      gemini_port ({{ gemini_port }}) must be above 1023 — Agate runs
       without root or CAP_NET_BIND_SERVICE and cannot bind below that.
     quiet: true
 

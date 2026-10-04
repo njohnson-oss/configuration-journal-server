@@ -52,17 +52,12 @@ gemini_domain: "{{ web_domain }}"
 acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
                                            # registered with the ACME CA
 
-# ── Clearnet ports ────────────────────────────────────────────────────
+# ── Ports ─────────────────────────────────────────────────────────────
 # 80, 443 and 1965 are fixed in vars/policy.yml: ACME HTTP-01 and the
 # Gemini scheme both expect them, and the firewall and the servers have
-# to agree. They are referenced below as web_http_port, web_https_port
-# and gemini_port.
-
-# ── Loopback ports the hidden transports forward to ───────────────────
-# Nothing listens on these outside 127.0.0.1; the firewall never sees them.
-web_hidden_port: 8080
-cgit_hidden_port: 8081
-gemini_hidden_port: 1966
+# to agree. They are referenced as web_http_port, web_https_port and
+# gemini_port. Tor and I2P forward to the same ports on 127.0.0.1, so
+# the servers tell the transports apart by hostname alone.
 
 # ── SSH ───────────────────────────────────────────────────────────────
 ssh_port: 22

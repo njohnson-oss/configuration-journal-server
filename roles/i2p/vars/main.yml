@@ -3,9 +3,10 @@
 # occurs when it cannot open the configured .dat file.
 i2p_tunnel_signature_type: 7
 
-# One server tunnel per service, each forwarding to that service's
-# loopback port.
+# One server tunnel per service, each forwarding to the port the service
+# already listens on. Web and cgit share Caddy's HTTP port; the tunnels
+# pass the Host header through untouched, and Caddy routes on it.
 i2p_server_tunnels:
-  - { name: web, port: "{{ web_hidden_port }}" }
-  - { name: gemini, port: "{{ gemini_hidden_port }}" }
-  - { name: cgit, port: "{{ cgit_hidden_port }}" }
+  - { name: web, port: "{{ web_http_port }}" }
+  - { name: gemini, port: "{{ gemini_port }}" }
+  - { name: cgit, port: "{{ web_http_port }}" }

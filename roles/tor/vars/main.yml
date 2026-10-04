@@ -1,5 +1,5 @@
 ---
 # "<virtual port> <target>", as HiddenServicePort takes them.
 tor_onion_ports:
-  - "{{ web_http_port }} 127.0.0.1:{{ web_hidden_port }}"
-  - "{{ gemini_port }} 127.0.0.1:{{ gemini_hidden_port }}"
+  - "{{ web_http_port }} 127.0.0.1:{{ web_http_port }}"
+  - "{{ gemini_port }} 127.0.0.1:{{ gemini_port }}"

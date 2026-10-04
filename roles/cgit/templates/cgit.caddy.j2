@@ -51,7 +51,6 @@
 }
 
 # ── Tor and I2P ───────────────────────────────────────────────────────
-http://{{ cgit_onion_hostname }}:{{ web_hidden_port }}, http://{{ i2p_addresses.cgit }}:{{ cgit_hidden_port }} {
-	bind 127.0.0.1
+http://{{ cgit_onion_hostname }}, http://{{ i2p_addresses.cgit }} {
 	import cgit_app
 }

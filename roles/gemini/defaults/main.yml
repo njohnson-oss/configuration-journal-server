@@ -53,5 +53,4 @@ gemini_der_conversions:
 gemini_listen_addresses:
   - "0.0.0.0:{{ gemini_port }}"
   - "[::]:{{ gemini_port }}"
-  - "127.0.0.1:{{ gemini_hidden_port }}"  # Tor and I2P forward here
 gemini_lang: en
