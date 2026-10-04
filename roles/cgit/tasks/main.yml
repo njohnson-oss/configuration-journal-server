@@ -69,6 +69,42 @@
   loop_control:
     label: "{{ item.name }}"
 
+# ── Idle times ────────────────────────────────────────────────────────
+# cgit's contrib/hooks/post-receive.agefile, verbatim. It writes the newest
+# commit date to info/web/last-modified, cgit's default agefile.
+- name: Update the agefile on every push
+  ansible.builtin.copy:
+    src: post-receive
+    dest: "{{ cgit_repo_root }}/{{ item.name }}.git/hooks/post-receive"
+    owner: "{{ cgit_user }}"
+    group: "{{ cgit_group }}"
+    mode: "0755"
+  loop: "{{ cgit_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+# Mirrors are only fetched, never pushed to, so their hook has to be run
+# here. A repository without refs gets an empty agefile, which is removed
+# so cgit shows no age at all.
+- name: Record each mirror's newest commit date
+  ansible.builtin.shell:
+    cmd: |
+      set -e
+      agefile=info/web/last-modified
+      old=$(cat "$agefile" 2>/dev/null || echo absent)
+      hooks/post-receive
+      [ -s "$agefile" ] || rm -f "$agefile"
+      new=$(cat "$agefile" 2>/dev/null || echo absent)
+      [ "$old" = "$new" ] || echo changed
+    chdir: "{{ cgit_repo_root }}/{{ item.name }}.git"
+  become: true
+  become_user: "{{ cgit_user }}"
+  register: cgit_agefile_update
+  changed_when: cgit_agefile_update.stdout == 'changed'
+  loop: "{{ cgit_repositories | selectattr('source', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
 - name: Write the cgit configuration
   ansible.builtin.template:
     src: cgitrc.j2

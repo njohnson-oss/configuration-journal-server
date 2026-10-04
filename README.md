@@ -139,6 +139,11 @@ without one is created as an empty bare repository you push to over SSH
 user owns the repositories, so either push as a member of that group or
 run `git push` as `cgit`).
 
+The index's Idle column shows each repository's newest commit, not when it
+was last pushed or fetched: cgit's `post-receive.agefile` hook writes that
+date to `info/web/last-modified` on every push, and every play run does the
+same for mirrors, so cgit reads it instead of the refs' mtimes.
+
 Clones are served by `git-http-backend` (smart HTTP) over all three
 transports; `git-receive-pack` is never enabled, so HTTP access is read-only.
 
