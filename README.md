@@ -152,6 +152,11 @@ nmap -Pn -p- example.com
 
 # hidden transports
 torsocks curl -I http://<onion>/
+curl -sI https://example.com/ | grep -i onion-location  # Tor Browser's "onion available"
 curl -I http://<b32>.b32.i2p/ --proxy http://127.0.0.1:4444  # via a local i2pd
+
+# cgit clones over smart HTTP, on every transport
 git clone https://git.example.com/dotfiles.git
+torsocks git clone http://git.<onion>/dotfiles.git
+git -c http.proxy=http://127.0.0.1:4444 clone http://<cgit-b32>.b32.i2p/dotfiles.git  # cgit's own destination
 ```
