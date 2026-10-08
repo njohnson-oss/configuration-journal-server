@@ -1,5 +1,7 @@
 # Configuration - Journal Server
 
+[![Lint](https://github.com/njohnson-oss/configuration-journal-server/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/njohnson-oss/configuration-journal-server/actions/workflows/lint.yml)
+
 Ansible playbook that serves a website, Gemini capsule, and cgit
 instance, each reachable over the clearnet, a Tor onion address, and an
 I2P destination.
