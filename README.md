@@ -40,7 +40,7 @@ server's IP.
 
 ## Requirements
 
-* **Controller:** `ansible-core` ≥ 2.15, then `ansible-galaxy install -r requirements.yml`.
+* **Controller:** `ansible-core`, then `ansible-galaxy install -r requirements.yml`.
   Also `pip install libnacl` (and libsodium itself, e.g. `apt install
   libsodium23`) — the `onion_address` filter derives the `.onion` from the
   service secret key with libsodium's Ed25519 scalar multiplication.
