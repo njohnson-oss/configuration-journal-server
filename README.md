@@ -136,10 +136,10 @@ cgit_repositories:
 ```
 
 An entry with `source` is mirrored and re-fetched on every run; an entry
-without one is created as an empty bare repository you push to over SSH
-(`git remote add origin deploy@host:/srv/git/dotfiles.git` — the `cgit`
-user owns the repositories, so either push as a member of that group or
-run `git push` as `cgit`).
+without one is created as an empty bare repository that the accounts in
+`cgit_pushers` (`admin_user` by default) push to over SSH:
+`git remote add origin deploy@host:/srv/git/dotfiles.git`. The play adds
+them to the `cgit` group and shares the repositories with it.
 
 The index's Idle column shows each repository's newest commit, not when it
 was last pushed or fetched: cgit's `post-receive.agefile` hook writes that

@@ -10,6 +10,10 @@
 # each of your repositories.
 #
 
+# Added for this playbook: the hook runs as whoever pushed, and every
+# pusher in the repository's group has to be able to rewrite the agefile.
+umask 002
+
 agefile="$(git rev-parse --git-dir)"/info/web/last-modified
 
 mkdir -p "$(dirname "$agefile")" &&

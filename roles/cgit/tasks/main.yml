@@ -15,6 +15,26 @@
     create_home: false
     state: present
 
+# A pusher sshd turns away could never push, so catch it here rather than
+# as a refused login.
+- name: Refuse pushers who cannot log in over SSH
+  ansible.builtin.assert:
+    that:
+      - cgit_pushers | difference(ssh_allowed_users) | length == 0
+    fail_msg: >-
+      {{ cgit_pushers | difference(ssh_allowed_users) | join(', ') }} in
+      cgit_pushers but not in ssh_allowed_users, so sshd would refuse them.
+    quiet: true
+
+# Pushes write to the repositories as the pusher, not as cgit. They are
+# shared with the cgit group, so membership is what lets a push in.
+- name: Let the pushers write to the repositories
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: ["{{ cgit_group }}"]
+    append: true
+  loop: "{{ cgit_pushers }}"
+
 - name: Install cgit and the FastCGI wrapper
   ansible.builtin.apt:
     name: "{{ cgit_packages }}"
@@ -57,10 +77,12 @@
   loop_control:
     label: "{{ item.name }}"
 
+# --shared=group keeps everything git writes group-writable, whichever
+# pusher writes it, so the next pusher can write over it.
 - name: Initialise the repositories that have no upstream
   ansible.builtin.command:
     cmd: >-
-      git init --bare --object-format={{ cgit_object_format }}
+      git init --bare --shared=group --object-format={{ cgit_object_format }}
       --initial-branch={{ cgit_initial_branch }} {{ cgit_repo_root }}/{{ item.name }}.git
     creates: "{{ cgit_repo_root }}/{{ item.name }}.git/HEAD"
   become: true
@@ -69,9 +91,50 @@
   loop_control:
     label: "{{ item.name }}"
 
+# Repositories initialised before --shared=group are only cgit's to
+# write. Share them once; git keeps them shared from then on.
+- name: Share the older repositories with the pushers
+  ansible.builtin.shell:
+    cmd: |
+      set -eo pipefail
+      case "$(git config --get core.sharedRepository || true)" in
+        1|group|true) exit 0 ;;
+      esac
+      git config core.sharedRepository group
+      chmod -R g+rwX .
+      find . -type d -exec chmod g+s {} +
+      echo changed
+    chdir: "{{ cgit_repo_root }}/{{ item.name }}.git"
+    executable: /bin/bash
+  become: true
+  become_user: "{{ cgit_user }}"
+  register: cgit_share
+  changed_when: cgit_share.stdout == 'changed'
+  loop: "{{ cgit_repositories | rejectattr('source', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+# git-receive-pack refuses a repository its user does not own, and these
+# are cgit's. Listed one by one: safe.directory takes no wildcard before
+# git 2.46.
+- name: Let the pushers' git trust the repositories
+  ansible.builtin.blockinfile:
+    path: /etc/gitconfig
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+    marker: "# {mark} cgit repositories, managed by Ansible"
+    block: |
+      [safe]
+      {% for repo in cgit_repositories | rejectattr('source', 'defined') %}
+        directory = {{ cgit_repo_root }}/{{ repo.name }}.git
+      {% endfor %}
+
 # ── Idle times ────────────────────────────────────────────────────────
-# cgit's contrib/hooks/post-receive.agefile, verbatim. It writes the newest
-# commit date to info/web/last-modified, cgit's default agefile.
+# cgit's contrib/hooks/post-receive.agefile, plus a umask so that every
+# pusher can rewrite what another wrote. It writes the newest commit date
+# to info/web/last-modified, cgit's default agefile.
 - name: Update the agefile on every push
   ansible.builtin.copy:
     src: post-receive

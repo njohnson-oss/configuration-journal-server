@@ -8,6 +8,7 @@
 
 ### Fixed
 
+- Pushing over SSH to a repository without a `source` works, as the README described. Nobody but `cgit` could write to one: the admin was not in its group, the repositories were not group-writable, and git refuses to push into a repository another user owns. The accounts in the new `cgit_pushers`, `admin_user` by default, are now added to the `cgit` group, the repositories are shared with it (existing ones on the next run), and git is told to trust them.
 - Apt takes only Caddy from Caddy's repository, whatever else it publishes.
 - Unattended upgrades now update Caddy. They take packages only from the distribution's own archives by default, so Caddy from its own repository was updated only by a redeploy.
 - Caddy's package signing key is pinned by checksum, so a key server serving a different key fails the deploy instead of installing it.

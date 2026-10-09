@@ -129,6 +129,14 @@ capsule_source: ""
 cgit_root_title: "{{ web_domain }} repositories"
 cgit_root_desc: "public git repositories"
 cgit_default_owner: "{{ admin_user }}"
+
+# Accounts that may push over SSH to the repositories without a source.
+# Each is added to the cgit group, and must be in ssh_allowed_users to
+# log in at all. Pushers share the repositories, hooks included, so each
+# can run code as any other; admin_user has sudo, so list only accounts
+# you would trust with root.
+cgit_pushers: ["{{ admin_user }}"]
+
 cgit_repositories: []
 #   - name: myproject
 #     description: "My description"
