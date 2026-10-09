@@ -34,6 +34,23 @@
     group: root
     mode: "0644"
 
+# Before the repository exists, so apt never sees its other packages as
+# candidates.
+- name: Restrict apt to Caddy from that repository
+  ansible.builtin.copy:
+    dest: /etc/apt/preferences.d/caddy-stable
+    content: |
+      Package: *
+      Pin: release o={{ caddy_repo_origin }}
+      Pin-Priority: -1
+
+      Package: {{ caddy_repo_allowed_packages | join(' ') }}
+      Pin: release o={{ caddy_repo_origin }}
+      Pin-Priority: 500
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Configure the Caddy repository
   ansible.builtin.deb822_repository:
     name: caddy-stable

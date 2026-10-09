@@ -149,6 +149,12 @@ same for mirrors, so cgit reads it instead of the refs' mtimes.
 Clones are served by `git-http-backend` (smart HTTP) over all three
 transports; `git-receive-pack` is never enabled, so HTTP access is read-only.
 
+## Updates
+
+Caddy is installed and upgraded from Caddy's own repository, which is
+**pinned** so that apt takes only `caddy` from it, whatever else it
+publishes.
+
 ## Verifying
 
 ```sh

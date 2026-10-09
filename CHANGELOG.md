@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Apt takes only Caddy from Caddy's repository, whatever else it publishes.
+
 ## [1.0.0] - 2026-10-08
 
 ### Added

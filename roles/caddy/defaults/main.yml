@@ -31,5 +31,7 @@ caddy_repo_keyring: /etc/apt/keyrings/caddy-stable.asc
 caddy_repo_uri: https://dl.cloudsmith.io/public/caddy/stable/deb/debian
 caddy_repo_suite: any-version
 caddy_repo_component: main
+caddy_repo_origin: cloudsmith/caddy/stable
+caddy_repo_allowed_packages: "{{ caddy_packages }}"
 
 caddy_protocols: [h1, h2, h3]
