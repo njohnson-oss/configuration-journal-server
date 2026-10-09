@@ -23,10 +23,12 @@ caddy_log_redacted_fields:
   - request>headers>X-Real-Ip
   - request>headers>Forwarded
 
-# deb822_repository depends on python3-debian, so it is installed
-# before the Caddy repository.
+# The signing key is pinned by checksum; update both together if it
+# changes. deb822_repository depends on python3-debian, so it is
+# installed before the Caddy repository.
 caddy_repo_packages: [python3-debian]
 caddy_repo_key_url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
+caddy_repo_key_checksum: sha256:783dfee04b19e851a928cd87b34710213ebbe7628f98d9f34595ab83be578c00
 caddy_repo_keyring: /etc/apt/keyrings/caddy-stable.asc
 caddy_repo_uri: https://dl.cloudsmith.io/public/caddy/stable/deb/debian
 caddy_repo_suite: any-version

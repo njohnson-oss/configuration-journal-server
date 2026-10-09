@@ -6,6 +6,7 @@
 
 - Apt takes only Caddy from Caddy's repository, whatever else it publishes.
 - Unattended upgrades now update Caddy. They take packages only from the distribution's own archives by default, so Caddy from its own repository was updated only by a redeploy.
+- Caddy's package signing key is pinned by checksum, so a key server serving a different key fails the deploy instead of installing it.
 
 ## [1.0.0] - 2026-10-08
 

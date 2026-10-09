@@ -30,6 +30,7 @@
   ansible.builtin.get_url:
     url: "{{ caddy_repo_key_url }}"
     dest: "{{ caddy_repo_keyring }}"
+    checksum: "{{ caddy_repo_key_checksum }}"
     owner: root
     group: root
     mode: "0644"
