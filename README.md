@@ -153,7 +153,9 @@ transports; `git-receive-pack` is never enabled, so HTTP access is read-only.
 
 Caddy is installed and upgraded from Caddy's own repository, which is
 **pinned** so that apt takes only `caddy` from it, whatever else it
-publishes.
+publishes. Unattended upgrades update Caddy from there too: by default
+they take only the distribution's own packages, so the role adds Caddy's
+repository to the ones they take from.
 
 ## Verifying
 

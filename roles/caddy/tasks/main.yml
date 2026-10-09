@@ -68,6 +68,19 @@
     state: present
     update_cache: "{{ caddy_repo.changed }}"
 
+# Unattended upgrades take packages only from the distribution's own
+# archives unless told otherwise.
+- name: Let unattended upgrades update Caddy
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/51unattended-upgrades-caddy
+    content: |
+      Unattended-Upgrade::Origins-Pattern {
+        "site={{ caddy_repo_uri | urlsplit('hostname') }},origin={{ caddy_repo_origin }}";
+      };
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Create the vhost directory
   ansible.builtin.file:
     path: "{{ caddy_sites_dir }}"

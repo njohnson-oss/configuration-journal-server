@@ -5,6 +5,7 @@
 ### Fixed
 
 - Apt takes only Caddy from Caddy's repository, whatever else it publishes.
+- Unattended upgrades now update Caddy. They take packages only from the distribution's own archives by default, so Caddy from its own repository was updated only by a redeploy.
 
 ## [1.0.0] - 2026-10-08
 
