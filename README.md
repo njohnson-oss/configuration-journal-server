@@ -127,8 +127,10 @@ ansible_port: 22  # or whatever you set ssh_port to
 ```
 
 Useful tag selections: `--tags web`, `--tags gemini`, `--tags cgit`,
-`--tags firewall,ssh`. Every role depends on `common`, so a run with
-tags runs it too, and needs `admin_authorized_keys` as a full run does.
+`--tags ssh`. `ssh` and `firewall` each run both roles, so a change to
+`ssh_port` reaches sshd and the firewall together. Every role depends on
+`common`, so a run with tags runs it too, and needs
+`admin_authorized_keys` as a full run does.
 
 ## Publishing repositories
 

@@ -37,10 +37,13 @@
     # Every other role depends on common, so it runs with any tags. A tag
     # here would make it a second, separate entry, run twice.
     - role: common
+    # Each with both tags: the firewall admits only ssh_port, so after a
+    # change to it, running either role without the other locks the next
+    # connection out.
     - role: firewall
-      tags: [firewall]
+      tags: [firewall, ssh]
     - role: ssh_hardening
-      tags: [ssh]
+      tags: [ssh, firewall]
     - role: tor
       tags: [tor]
     - role: i2p
