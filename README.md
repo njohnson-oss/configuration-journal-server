@@ -29,12 +29,12 @@ server's IP.
 
 | Path | Purpose |
 | --- | --- |
-| `site.yml` | installs sudo and Python, then the main play: asserts inputs, resolves addresses, runs the roles |
+| `site.yml` | installs sudo and Python, then runs the roles in order |
 | `inventory/group_vars/all/main.yml` | **every** deployment-specific value |
-| `vars/policy.yml` | invariants, not user-modifiable settings |
 | `filter_plugins/tor.py` | derives a `.onion` address from a v3 service secret key |
 | `filter_plugins/i2p.py` | derives a `.b32.i2p` address from a destination key |
-| `roles/common` | packages, admin account, unattended upgrades |
+| `roles/addresses` | checks the onion and I2P keys exist and derives the addresses from them |
+| `roles/common` | what every role builds on: refuses anything but Debian 12 and 13, holds the invariants (not user-modifiable settings), installs base packages, creates the admin account, enables unattended upgrades |
 | `roles/firewall` | nftables, default-deny inbound |
 | `roles/ssh_hardening` | PQ-only key exchange, key-only auth |
 | `roles/tor` | the onion service, from a user-supplied key |
@@ -43,6 +43,10 @@ server's IP.
 | `roles/website` | content + vhosts (clearnet, onion, I2P) |
 | `roles/gemini` | Agate, certificates, capsule content |
 | `roles/cgit` | repositories, fcgiwrap under its own user, vhosts |
+
+Each role's `meta/main.yml` lists the roles it needs, such as `common`
+for every role and `caddy` for the website and cgit. Ansible runs those
+first, once each, so a role also works as the only one in a play.
 
 ## Requirements
 
@@ -123,7 +127,8 @@ ansible_port: 22  # or whatever you set ssh_port to
 ```
 
 Useful tag selections: `--tags web`, `--tags gemini`, `--tags cgit`,
-`--tags firewall,ssh`.
+`--tags firewall,ssh`. Every role depends on `common`, so a run with
+tags runs it too, and needs `admin_authorized_keys` as a full run does.
 
 ## Publishing repositories
 

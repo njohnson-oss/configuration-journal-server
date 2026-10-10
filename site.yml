@@ -24,85 +24,19 @@
   hosts: journal
   become: true
 
-  vars_files:
-    - vars/policy.yml
-
-  pre_tasks:
-    # Package names, paths and versions (cgit's SHA-256 support among them)
-    # are chosen for these releases only.
-    - name: Refuse to deploy to anything but Debian 12 or 13
-      ansible.builtin.assert:
-        that:
-          - ansible_facts['distribution'] == 'Debian'
-          - ansible_facts['distribution_major_version'] in ['12', '13']
-        fail_msg: >-
-          This playbook supports Debian 12 and 13 only; the host runs
-          {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}.
-        quiet: true
-      tags: [always]
-
-    - name: Refuse to deploy without the user's SSH keys
-      ansible.builtin.assert:
-        that:
-          - admin_authorized_keys | length > 0
-        fail_msg: >-
-          admin_authorized_keys is empty. Pass the public key(s) at
-          deploy time. E.g: -e '{"admin_authorized_keys":["ssh-ed25519 AAAA..."]}'
-        quiet: true
-      tags: [always]
-
-    - name: Refuse to deploy without the onion service secret key
-      ansible.builtin.assert:
-        that:
-          - (tor_onion_key_dir ~ '/hs_ed25519_secret_key') is file
-        fail_msg: >-
-          missing {{ tor_onion_key_dir }}/hs_ed25519_secret_key — keep the
-          secret key between rebuilds, or the .onion address changes every
-          time.
-        quiet: true
-      tags: [always]
-
-    - name: Derive the onion address from the supplied service key
-      ansible.builtin.set_fact:
-        onion_hostname: "{{ (tor_onion_key_dir ~ '/hs_ed25519_secret_key') | onion_address }}"
-      tags: [always]
-
-    - name: Name cgit's subdomain of the onion
-      ansible.builtin.set_fact:
-        cgit_onion_hostname: "{{ cgit_onion_subdomain }}.{{ onion_hostname }}"
-      tags: [always]
-
-    - name: Refuse to deploy without every I2P destination key
-      ansible.builtin.assert:
-        that:
-          - (i2p_key_dir ~ '/' ~ item ~ '.dat') is file
-        fail_msg: >-
-          missing {{ i2p_key_dir }}/{{ item }}.dat — the destination key must
-          exist on the controller before deploy, and its contents must persist
-          across rebuilds, or the .b32.i2p address changes every time.
-        quiet: true
-      loop: [web, gemini, cgit]
-      tags: [always]
-
-    - name: Derive the I2P destination address of each supplied tunnel key
-      ansible.builtin.set_fact:
-        i2p_addresses: "{{ i2p_addresses | default({}) | combine({item: (i2p_key_dir ~ '/' ~ item ~ '.dat') | i2p_b32}) }}"
-      loop: [web, gemini, cgit]
-      tags: [always]
-
-    - name: Show the addresses this host will answer to
-      ansible.builtin.debug:
-        msg:
-          - "web     : https://{{ web_domain }} | http://{{ onion_hostname }} | http://{{ i2p_addresses.web }}"
-          - "gemini  : gemini://{{ gemini_domain }} | gemini://{{ onion_hostname }} | gemini://{{ i2p_addresses.gemini }}"
-          - "cgit    : https://{{ cgit_domain }} | http://{{ cgit_onion_hostname }} | http://{{ i2p_addresses.cgit }}"
-      tags: [always]
-
+  # Each role lists the roles it needs in its meta/main.yml, and Ansible
+  # runs those first, once each, so any of them also runs alone. This
+  # list only sets the order.
   roles:
+    # First, though only the transports and services need it, so that a
+    # missing key is refused before anything is deployed.
+    - role: addresses
+      tags: [always]
     # Order matters: open the firewall, harden sshd, then bring the
-    # transports up before the services that advertise their addresses
+    # transports up before the services that advertise their addresses.
+    # Every other role depends on common, so it runs with any tags. A tag
+    # here would make it a second, separate entry, run twice.
     - role: common
-      tags: [common]
     - role: firewall
       tags: [firewall]
     - role: ssh_hardening

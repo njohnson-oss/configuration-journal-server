@@ -1,6 +1,7 @@
 ---
-# These are play vars, so inventory and group_vars cannot modify them.
-# Four kinds of value live here:
+# Every role depends on common, through its meta/main.yml, for these
+# values. They are role vars, so inventory and group_vars cannot modify
+# them. Four kinds of value live here:
 #
 # 1. Numbers that several roles have to agree on and that are not free
 #    to choose because something outside this playbook expects them.

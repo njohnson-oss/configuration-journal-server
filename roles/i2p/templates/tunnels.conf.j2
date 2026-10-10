@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 {% for tunnel in i2p_server_tunnels %}
-# {{ tunnel.name }} — {{ i2p_addresses[tunnel.name] }}
+# {{ tunnel.name }} — {{ addresses_i2p[tunnel.name] }}
 [{{ tunnel.name }}]
 type = server
 host = 127.0.0.1

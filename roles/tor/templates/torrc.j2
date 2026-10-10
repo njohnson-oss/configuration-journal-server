@@ -11,7 +11,7 @@ HiddenServiceNonAnonymousMode {{ tor_single_hop | ternary(1, 0) }}
 Log {{ tor_log }}
 DataDirectory {{ tor_data_dir }}
 
-# {{ onion_hostname }}
+# {{ addresses_onion_hostname }}
 HiddenServiceDir {{ tor_service_dir }}
 HiddenServiceVersion 3
 {% for port in tor_onion_ports %}

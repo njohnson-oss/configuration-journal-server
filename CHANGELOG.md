@@ -12,6 +12,7 @@
 - cgit discards its access log, as the website does. It kept one at `/var/log/caddy/cgit.log`, with visitor addresses removed.
 - Neither Caddy nor Agate logs requests, failed ones included. Caddy logged requests that failed with a server error, and Agate a line for every request, though neither with the visitor's address.
 - cgit's FastCGI unit is locked down as Agate's is: no capabilities, a private user namespace, a hidden `/proc`, native system calls only and a 0077 umask among others. cgit and git parse repository data on every request.
+- Every role lists the roles it needs in its `meta/main.yml` and runs on its own. Every role depends on `common`, which now also holds `vars/policy.yml`'s values and the Debian check, so a run with tags runs it too. The key checks and address derivation in `site.yml`'s pre_tasks moved to the `addresses` and `common` roles. The address facts are named for their role: `addresses_onion_hostname`, `addresses_cgit_onion_hostname` and `addresses_i2p`.
 
 ### Fixed
 

@@ -1,4 +1,25 @@
 ---
+# Package names, paths and versions (cgit's SHA-256 support among them)
+# are chosen for these releases only.
+- name: Refuse to deploy to anything but Debian 12 or 13
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Debian'
+      - ansible_facts['distribution_major_version'] in ['12', '13']
+    fail_msg: >-
+      This playbook supports Debian 12 and 13 only; the host runs
+      {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}.
+    quiet: true
+
+- name: Refuse to deploy without the user's SSH keys
+  ansible.builtin.assert:
+    that:
+      - admin_authorized_keys | length > 0
+    fail_msg: >-
+      admin_authorized_keys is empty. Pass the public key(s) at
+      deploy time. E.g: -e '{"admin_authorized_keys":["ssh-ed25519 AAAA..."]}'
+    quiet: true
+
 - name: Install base packages
   ansible.builtin.apt:
     name: "{{ common_packages }}"

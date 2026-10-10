@@ -45,11 +45,11 @@
 {{ cgit_domain }} {
 	import pq_tls
 	header Strict-Transport-Security "{{ cgit_hsts }}"
-	header Onion-Location "http://{{ cgit_onion_hostname }}{uri}"
+	header Onion-Location "http://{{ addresses_cgit_onion_hostname }}{uri}"
 	import cgit_app
 }
 
 # ── Tor and I2P ───────────────────────────────────────────────────────
-http://{{ cgit_onion_hostname }}, http://{{ i2p_addresses.cgit }} {
+http://{{ addresses_cgit_onion_hostname }}, http://{{ addresses_i2p.cgit }} {
 	import cgit_app
 }

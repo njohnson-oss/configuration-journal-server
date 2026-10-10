@@ -4,7 +4,7 @@
 #  from inventory.
 # ═══════════════════════════════════════════════════════════════════════
 
-# Matches the clearnet minimum TLS version in vars/policy.yml.
+# Matches the clearnet minimum TLS version in roles/common.
 gemini_only_tls13: true
 
 # Self-signed material generated for any hostname not listed in
@@ -21,5 +21,5 @@ gemini_key_type: Ed25519
 # domain, the onion, and its own I2P destination.
 gemini_hostnames:
   - "{{ gemini_domain }}"
-  - "{{ onion_hostname }}"
-  - "{{ i2p_addresses.gemini }}"
+  - "{{ addresses_onion_hostname }}"
+  - "{{ addresses_i2p.gemini }}"

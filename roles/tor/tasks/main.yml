@@ -75,9 +75,9 @@
 - name: Check the published address against the one derived from the key
   ansible.builtin.assert:
     that:
-      - tor_published_hostname.content | b64decode | trim == onion_hostname
+      - tor_published_hostname.content | b64decode | trim == addresses_onion_hostname
     fail_msg: >-
       tor published {{ tor_published_hostname.content | b64decode | trim }},
-      the controller derived {{ onion_hostname }} from
+      the controller derived {{ addresses_onion_hostname }} from
       {{ tor_onion_key_dir }}/{{ tor_secret_key_filename }}.
     quiet: true

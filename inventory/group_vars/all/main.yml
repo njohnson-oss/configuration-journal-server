@@ -4,7 +4,7 @@
 #  implementation defaults (paths, package names) in their defaults/.
 #
 #  Crypto policy and the ports the stack is pinned to are deliberately
-#  NOT here: they are invariants, and live in vars/policy.yml and the
+#  NOT here: they are invariants, and live in roles/common and the
 #  roles' vars/main.yml, where inventory cannot override them. Changing
 #  one needs an explicit -e for a single run.
 #
@@ -53,7 +53,7 @@ acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
                                            # registered with the ACME CA
 
 # ── Ports ─────────────────────────────────────────────────────────────
-# 80, 443 and 1965 are fixed in vars/policy.yml: ACME HTTP-01 and the
+# 80, 443 and 1965 are fixed in roles/common: ACME HTTP-01 and the
 # Gemini scheme both expect them, and the firewall and the servers have
 # to agree. They are referenced as web_http_port, web_https_port and
 # gemini_port. Tor and I2P forward to the same ports on 127.0.0.1, so
