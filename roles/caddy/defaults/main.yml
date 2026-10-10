@@ -18,3 +18,8 @@ caddy_repo_uri: https://dl.cloudsmith.io/public/caddy/stable/deb/debian
 caddy_repo_suite: any-version
 caddy_repo_component: main
 caddy_repo_origin: cloudsmith/caddy/stable
+
+# Described in inventory/group_vars/all/main.yml, which lists it
+# commented out. The website and cgit, which both depend on this role,
+# send it.
+web_hsts: "max-age=31536000; includeSubDomains"

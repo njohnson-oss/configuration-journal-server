@@ -16,7 +16,6 @@ cgit_fcgiwrap_binary: /usr/sbin/fcgiwrap
 cgit_fcgiwrap_service: cgit-fcgiwrap
 
 cgit_vhost_path: "{{ caddy_sites_dir }}/20-cgit.caddy"
-cgit_hsts: "max-age=31536000; includeSubDomains"
 
 cgit_cache_size: 1000
 

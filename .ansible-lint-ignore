@@ -14,6 +14,10 @@ roles/common/defaults/main.yml var-naming[no-role-prefix]
 # roles', not addresses_*.
 roles/addresses/defaults/main.yml var-naming[no-role-prefix]
 
+# The website and cgit both send the HSTS header the caddy role builds,
+# so its setting is named for the web, as web_domain is.
+roles/caddy/defaults/main.yml var-naming[no-role-prefix]
+
 # The stale public key and hostname must be gone before tor restarts, and
 # only for the services whose key changed. A handler could do it too; kept
 # as a task so the deletion stays next to the key copy that requires it.
