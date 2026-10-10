@@ -6,7 +6,7 @@
 Port {{ ssh_port }}
 AddressFamily any
 
-KexAlgorithms {{ ssh_hardening_kex_effective | join(',') }}
+KexAlgorithms {{ ssh_hardening_kex[ansible_facts['distribution_major_version']] | join(',') }}
 Ciphers {{ ssh_hardening_ciphers | join(',') }}
 MACs {{ ssh_hardening_macs | join(',') }}
 

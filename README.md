@@ -46,14 +46,11 @@ server's IP.
   service secret key with libsodium's Ed25519 scalar multiplication.
   `rsync` too, which pushes the site and capsule content.
 * **Target:** Debian 12/13 with Python 3.
-* **OpenSSH ≥ 8.5** on the target for `sntrup761x25519-sha512@openssh.com`,
-  or **≥ 9.9** for `mlkem768x25519-sha256`. The play probes `ssh -Q kex` and
-  refuses to continue if neither is available, rather than silently falling
-  back to a classical key exchange.
 * **Caddy ≥ 2.10** for the `x25519mlkem768` curve. Installed from the
   official Caddy repository by the role, so this is satisfied by default.
-* Your **SSH client** also needs one of those algorithms — check with
-  `ssh -Q kex | grep -E 'mlkem|sntrup'` before you lock yourself out.
+* Your **SSH client** needs one of the key exchanges sshd offers (see
+  Key exchange) — check with `ssh -Q kex | grep -E 'mlkem|sntrup'` before
+  you lock yourself out.
 
 ## Material you supply at deploy time
 
@@ -167,8 +164,11 @@ workflow checks weekly and fails when a newer release is out.
 
 ## Key exchange
 
-* **SSH and HTTPS** are post-quantum only: sshd's `KexAlgorithms` and
-  Caddy's `curves` list nothing else.
+* **SSH** is post-quantum only: sshd's `KexAlgorithms` lists only
+  `sntrup761x25519-sha512@openssh.com` on Debian 12 (OpenSSH 9.2), and
+  `mlkem768x25519-sha256` too on Debian 13 (OpenSSH 10.0).
+* **HTTPS** is post-quantum only: Caddy's `tls` directive sets `curves`
+  to the hybrid `x25519mlkem768` group alone.
 * **Gemini is TLS 1.3 only, not post-quantum.** Agate (as of 3.3.24) uses
   rustls's `ring` provider, which offers only X25519, P-256 and P-384, and
   has no option to choose key exchange groups. The hybrid group is

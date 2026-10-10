@@ -1,8 +1,6 @@
 ---
 # Implementation detail only. The algorithm policy lives in
 # vars/main.yml, where inventory cannot reach it.
-ssh_hardening_packages: [openssh-client]  # `ssh -Q kex`, used to probe PQ support
-
 ssh_hardening_dropin_path: /etc/ssh/sshd_config.d/10-hardening.conf
 ssh_hardening_service: ssh
 
