@@ -9,20 +9,35 @@ ExecStart={{ cgit_fcgiwrap_binary }}
 User={{ cgit_user }}
 Group={{ cgit_group }}
 
-# The CGI only ever reads repositories; the cache is its one writable path.
+# The same lockdown as agate.service, as cgit and git parse repository
+# data on every request. They only ever read the repositories; the cache
+# is the one writable path. Objects a pusher wrote belong to that pusher,
+# which PrivateUsers shows as nobody, but the cgit group still reads them.
 NoNewPrivileges=true
-PrivateTmp=true
-PrivateDevices=true
 ProtectSystem=strict
 ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+ProtectKernelLogs=true
+ProcSubset=pid
 RestrictAddressFamilies=AF_UNIX
 RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
 LockPersonality=true
 MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
 SystemCallFilter=@system-service
+CapabilityBoundingSet=
+UMask=0077
+RemoveIPC=true
+PrivateUsers=true
 ReadWritePaths={{ cgit_cache_dir }}
 
 [Install]
