@@ -6,4 +6,9 @@ i2p_group: i2pd
 i2p_config_path: /etc/i2pd/i2pd.conf
 i2p_tunnels_path: /etc/i2pd/tunnels.conf
 i2p_data_dir: /var/lib/i2pd
+
+# ── Router settings ───────────────────────────────────────────────────
+# Described in inventory/group_vars/all/main.yml, which lists each
+# commented out.
 i2p_ipv6: true
+i2p_bandwidth: L

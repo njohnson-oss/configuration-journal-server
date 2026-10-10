@@ -1,16 +1,4 @@
 ---
-# The Caddyfile leaves every request out of the log, but debug lines
-# from elsewhere, such as TLS handshakes, carry visitor addresses. Catch
-# that here rather than in a log file.
-- name: Refuse a log level that records visitor addresses
-  ansible.builtin.assert:
-    that:
-      - caddy_log_level | upper != 'DEBUG'
-    fail_msg: >-
-      caddy_log_level is DEBUG — debug lines include visitor IP
-      addresses.
-    quiet: true
-
 - name: Install Caddy repository tooling
   ansible.builtin.apt:
     name: "{{ caddy_repo_packages }}"

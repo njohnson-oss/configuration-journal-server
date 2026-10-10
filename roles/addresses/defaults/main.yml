@@ -1,0 +1,15 @@
+---
+# The names the server publishes, and where the keys behind its onion
+# and I2P addresses are. tor, i2p and every role that publishes a name
+# depend on this one, so each has one default, here. Inventory overrides
+# these; inventory/group_vars/all/main.yml lists and describes each,
+# commented out.
+secrets_dir: "{{ playbook_dir }}/secrets"
+
+web_aliases: ["www.{{ web_domain }}"]
+cgit_domain: "git.{{ web_domain }}"
+gemini_domain: "{{ web_domain }}"
+cgit_onion_subdomain: git
+
+tor_onion_key_dir: "{{ secrets_dir }}/onion"
+i2p_key_dir: "{{ secrets_dir }}/i2p"

@@ -1,0 +1,20 @@
+---
+# ═══════════════════════════════════════════════════════════════════════
+#  Guarantees the README makes about Caddy. Role vars, so inventory
+#  cannot override them.
+# ═══════════════════════════════════════════════════════════════════════
+
+# The repository's signing key, pinned so that a key server serving a
+# different key fails the deploy. Update it with the URL in defaults/.
+caddy_repo_key_checksum: sha256:783dfee04b19e851a928cd87b34710213ebbe7628f98d9f34595ab83be578c00
+
+# All apt takes from the repository, whatever else it publishes.
+caddy_repo_allowed_packages: "{{ caddy_packages }}"
+
+# HTTP/3 is why the firewall opens UDP on web_https_port.
+caddy_protocols: [h1, h2, h3]
+
+# Not DEBUG: debug-level lines, such as those about TLS handshakes,
+# record visitor addresses outside the http loggers the Caddyfile leaves
+# out.
+caddy_log_level: INFO

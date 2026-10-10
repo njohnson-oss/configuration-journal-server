@@ -4,26 +4,18 @@
 gemini_packages: [openssl, python3-cryptography, rsync]
 
 # ── Agate ─────────────────────────────────────────────────────────────
-# Agate is Rust. It is not packaged for Debian, so the release binary is
-# fetched and pinned by checksum. Update the version and the checksums
-# together -- get_url refuses the download if they disagree. Unattended
-# upgrades cannot do this; .github/workflows/agate.yml fails when a newer
-# release is out.
+# The version and its checksums are in vars/main.yml.
 gemini_service: agate
-gemini_version: 3.3.24
 gemini_release_base: "https://github.com/mbrubeck/agate/releases/download"
 gemini_bin_dir: /usr/local/bin
 gemini_binary: "{{ gemini_bin_dir }}/agate"
 gemini_versioned_binary: "{{ gemini_bin_dir }}/agate-{{ gemini_version }}"
 gemini_cache_dir: /var/cache/agate
 
-# sha256 of the published .gz, per target triple.
+# The release's target triple for each architecture.
 gemini_release_targets:
   x86_64: x86_64-unknown-linux-gnu
   aarch64: aarch64-unknown-linux-gnu
-gemini_release_checksums:
-  x86_64-unknown-linux-gnu: 32379846ff14ce980377455bd935dd8635c56c61a0f336fb76aa461195110404
-  aarch64-unknown-linux-gnu: 5e5e2f81d127da77a4b12e78d3d06e28b639246103bf9e8508bdb0103429b8f2
 
 gemini_user: gemini
 gemini_group: gemini
@@ -55,4 +47,10 @@ gemini_der_conversions:
 gemini_listen_addresses:
   - "0.0.0.0:{{ gemini_port }}"
   - "[::]:{{ gemini_port }}"
+
+# ── Deployment choices ────────────────────────────────────────────────
+# Described in inventory/group_vars/all/main.yml, which lists each
+# commented out.
+gemini_certificates: {}
 gemini_lang: en
+gemini_capsule_source: ""

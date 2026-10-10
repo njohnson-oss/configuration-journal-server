@@ -240,22 +240,22 @@
 - name: Refuse to mirror a capsule source with no index
   ansible.builtin.assert:
     that:
-      - (capsule_source ~ '/index.gmi') is file
+      - (gemini_capsule_source ~ '/index.gmi') is file
     fail_msg: >-
-      {{ capsule_source }}/index.gmi does not exist — refusing to mirror
+      {{ gemini_capsule_source }}/index.gmi does not exist — refusing to mirror
       what is probably the wrong or an empty directory over the capsule.
     quiet: true
-  when: capsule_source | length > 0
+  when: gemini_capsule_source | length > 0
 
 - name: Deploy the supplied capsule content
   ansible.posix.synchronize:
-    src: "{{ capsule_source }}/"
+    src: "{{ gemini_capsule_source }}/"
     dest: "{{ gemini_content_dir }}/"
     delete: true
     rsync_opts:
       - "--chown=root:{{ gemini_group }}"
       - "--chmod=D0750,F0640"
-  when: capsule_source | length > 0
+  when: gemini_capsule_source | length > 0
 
 - name: Deploy a placeholder capsule when no content was supplied
   ansible.builtin.template:
@@ -264,7 +264,7 @@
     owner: root
     group: "{{ gemini_group }}"
     mode: "0640"
-  when: capsule_source | length == 0
+  when: gemini_capsule_source | length == 0
 
 # With more than one --hostname Agate serves <content>/<hostname>/. All
 # the names are the same capsule, so each is a link to the one copy.

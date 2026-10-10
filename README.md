@@ -33,8 +33,8 @@ server's IP.
 | `inventory/group_vars/all/main.yml` | **every** deployment-specific value |
 | `filter_plugins/tor.py` | derives a `.onion` address from a v3 service secret key |
 | `filter_plugins/i2p.py` | derives a `.b32.i2p` address from a destination key |
-| `roles/addresses` | checks the onion and I2P keys exist and derives the addresses from them |
-| `roles/common` | what every role builds on: refuses anything but Debian 12 and 13, holds the invariants (not user-modifiable settings), installs base packages, creates the admin account, enables unattended upgrades |
+| `roles/addresses` | the names the server publishes: checks the onion and I2P keys exist and derives the addresses from them |
+| `roles/common` | what every role builds on: refuses anything but Debian 12 and 13, holds the invariants (not user-modifiable settings) and SSH access, installs base packages, creates the admin account, enables unattended upgrades |
 | `roles/firewall` | nftables, default-deny inbound |
 | `roles/ssh_hardening` | PQ-only key exchange, key-only auth |
 | `roles/tor` | the onion service, from a user-supplied key |
@@ -172,7 +172,7 @@ so the role installs the upstream release binary, pinned by checksum,
 and unattended upgrades cannot update it. That includes its TLS: Agate
 bundles rustls, so TLS fixes for Gemini arrive only with a new Agate
 release. To update, bump `gemini_version` and both checksums in
-`roles/gemini/defaults/main.yml` and redeploy. The `Agate release`
+`roles/gemini/vars/main.yml` and redeploy. The `Agate release`
 workflow checks weekly and fails when a newer release is out.
 
 ## Key exchange

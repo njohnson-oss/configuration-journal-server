@@ -1,18 +1,25 @@
 ---
 # ═══════════════════════════════════════════════════════════════════════
-#  Every deployment-specific value lives here. Roles carry only
-#  implementation defaults (paths, package names) in their defaults/.
+#  Every deployment-specific value is listed here. One with no sensible
+#  default is set, and deploying needs it. Every other is commented out,
+#  showing the default it takes from the defaults/main.yml of the role
+#  responsible for it: roles/common for SSH access, roles/addresses for
+#  names and keys, and otherwise the role that uses it. Uncomment one
+#  only to change it. Roles' defaults/ otherwise carry only
+#  implementation details and tuning: paths, package and service names,
+#  timeouts and limits.
 #
-#  Crypto policy and the ports the stack is pinned to are deliberately
-#  NOT here: they are invariants, and live in roles/common and the
+#  The guarantees the README makes are deliberately NOT here: crypto
+#  policy, the ports the stack is pinned to, checksum and apt pins, and
+#  what is logged. They are invariants, and live in roles/common and the
 #  roles' vars/main.yml, where inventory cannot override them. Changing
 #  one needs an explicit -e for a single run.
 #
 #  Using this file
 #  ───────────────
 #
-#   1. Replace every line marked CHANGE ME with your own values. Anything
-#      not marked has a working default and can stay as it is.
+#   1. Replace every line marked CHANGE ME with your own values. Every
+#      commented-out value works as it is.
 #   2. Point the "journal-server" host in inventory/hosts.yml at your server.
 #   3. Put the onion service key and the I2P destination keys under
 #      secrets_dir (see "Material you supply at deploy time" in
@@ -32,7 +39,7 @@
 # ═══════════════════════════════════════════════════════════════════════
 
 # ── Administration ────────────────────────────────────────────────────
-admin_user: deploy
+# admin_user: deploy
 admin_authorized_keys: []          # REQUIRED — list of SSH public keys.
                                    # Supply at deploy time, e.g.
                                    # -e '{"admin_authorized_keys":["ssh-ed25519 AAAA..."]}'
@@ -41,14 +48,14 @@ admin_authorized_keys: []          # REQUIRED — list of SSH public keys.
 # destination keys, optional TLS/Gemini certificates.
 #
 # Never committed — see .gitignore.
-secrets_dir: "{{ playbook_dir }}/secrets"
+# secrets_dir: "{{ playbook_dir }}/secrets"
 
 # ── Public names ──────────────────────────────────────────────────────
 web_domain: example.com                # CHANGE ME — the site's main domain
-web_aliases: ["www.{{ web_domain }}"]  # extra names that serve the site;
-                                       # [] for none
-cgit_domain: "git.{{ web_domain }}"
-gemini_domain: "{{ web_domain }}"
+# web_aliases: ["www.{{ web_domain }}"]  # extra names that serve the
+#                                        # site; [] for none
+# cgit_domain: "git.{{ web_domain }}"
+# gemini_domain: "{{ web_domain }}"
 acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
                                            # registered with the ACME CA
 
@@ -60,8 +67,8 @@ acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
 # the servers tell the transports apart by hostname alone.
 
 # ── SSH ───────────────────────────────────────────────────────────────
-ssh_port: 22
-ssh_allowed_users: ["{{ admin_user }}"]
+# ssh_port: 22
+# ssh_allowed_users: ["{{ admin_user }}"]
 
 # ── I2P ───────────────────────────────────────────────────────────────
 # This node publishes destinations either way. Setting a port here also
@@ -70,6 +77,10 @@ ssh_allowed_users: ["{{ admin_user }}"]
 # its own port, which stays closed — no inbound transit.
 i2p_router_port: ~
 
+# Whether i2pd also uses IPv6 to reach other routers. Set false on a
+# host without a public IPv6 address.
+# i2p_ipv6: true
+
 # Bandwidth and transit. Each of these is written to i2pd.conf only when
 # set: left as ~, i2pd applies its own default.
 
@@ -77,7 +88,7 @@ i2p_router_port: ~
 # plain integer is read as KB/s, and a suffixed one (100mb) as a rate.
 # It caps this router's total throughput, transit and your own visitors
 # together.
-i2p_bandwidth: L
+# i2p_bandwidth: L
 
 # Max % of i2p_bandwidth that transit may consume, 0-100. This is the
 # setting that keeps relayed traffic from crowding out your own: raise
@@ -100,47 +111,62 @@ i2p_notransit: false
 #
 # The directory must contain hs_ed25519_secret_key. Tor recreates
 # hs_ed25519_public_key and hostname from it on the host.
-tor_onion_key_dir: "{{ secrets_dir }}/onion"
+# tor_onion_key_dir: "{{ secrets_dir }}/onion"
 
-cgit_onion_subdomain: git
+# cgit_onion_subdomain: git
 
 # ── I2P destinations ──────────────────────────────────────────────────
 # One destination per service: a .b32.i2p address takes no subdomains,
 # so they cannot share one the way they share the onion. The directory
 # must contain web.dat, gemini.dat and cgit.dat, each an i2pd
 # destination key. The .b32.i2p addresses are derived from them.
-i2p_key_dir: "{{ secrets_dir }}/i2p"
+# i2p_key_dir: "{{ secrets_dir }}/i2p"
 
 # ── Gemini capsule ────────────────────────────────────────────────────
 # User-supplied Gemini certificates, keyed by hostname. Any hostname not
 # listed here gets a long-lived self-signed cert generated by Ansible.
-gemini_certificates: {}
+# Each is a certificate and key path, such as:
+#
 #   example.com:
 #     cert: "{{ secrets_dir }}/gemini/example.com.crt"
 #     key:  "{{ secrets_dir }}/gemini/example.com.key"
+# gemini_certificates: {}
+
+# Language of the capsule's text/gemini pages, sent with each of them.
+# gemini_lang: en
 
 # ── Content ───────────────────────────────────────────────────────────
 # Local directories rsynced onto the host. Leave empty to deploy a
 # placeholder page so the deployment is verifiable before you have content.
-website_source: ""
-capsule_source: ""
+# website_source: ""
+# gemini_capsule_source: ""
 
 # ── Git repositories published on cgit ───────────────────────────
-cgit_root_title: "{{ web_domain }} repositories"
-cgit_root_desc: "public git repositories"
-cgit_default_owner: "{{ admin_user }}"
+# cgit_root_title: "{{ web_domain }} repositories"
+# cgit_root_desc: "public git repositories"
+# cgit_default_owner: "{{ admin_user }}"
+
+# Archive formats offered for download on each commit; "" for none.
+# cgit_snapshots: "tar.gz zip"
+
+# The branch a repository without a source starts on.
+# cgit_initial_branch: main
 
 # Accounts that may push over SSH to the repositories without a source.
 # Each is added to the cgit group, and must be in ssh_allowed_users to
 # log in at all. Pushers share the repositories, hooks included, so each
 # can run code as any other; admin_user has sudo, so list only accounts
 # you would trust with root.
-cgit_pushers: ["{{ admin_user }}"]
+# cgit_pushers: ["{{ admin_user }}"]
 
-cgit_repositories: []
+# The repositories published, none by default. Each is a name, plus
+# optionally a description, owner, section and a source to mirror, such
+# as:
+#
 #   - name: myproject
 #     description: "My description"
 #     owner: bob
 #     section: utilities
 #     source: "https://github.com/bob/myproject.git"   # optional; omit
 #                                                      # for an empty bare repo
+# cgit_repositories: []

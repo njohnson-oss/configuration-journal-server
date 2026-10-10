@@ -7,6 +7,12 @@ roles/cgit/tasks/main.yml command-instead-of-module
 # common holds the values every role shares, so their names are those
 # roles', not common_*. ansible_managed is Ansible's own name.
 roles/common/vars/main.yml var-naming[no-role-prefix]
+roles/common/defaults/main.yml var-naming[no-role-prefix]
+
+# addresses holds the names the server publishes and where their keys
+# are, which the roles publishing them share, so their names are those
+# roles', not addresses_*.
+roles/addresses/defaults/main.yml var-naming[no-role-prefix]
 
 # The stale public key and hostname must be gone before tor restarts, and
 # only for the services whose key changed. A handler could do it too; kept

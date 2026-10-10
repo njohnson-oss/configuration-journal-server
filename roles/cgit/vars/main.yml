@@ -1,0 +1,4 @@
+---
+# Git uses SHA-1 by default, but SHA-1 is weak. Repositories created
+# here use SHA-256. Role vars, so inventory cannot override it.
+cgit_object_format: sha256

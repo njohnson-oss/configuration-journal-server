@@ -23,15 +23,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          pinned=$(sed -n 's/^gemini_version: *//p' roles/gemini/defaults/main.yml)
+          pinned=$(sed -n 's/^gemini_version: *//p' roles/gemini/vars/main.yml)
           if [ -z "$pinned" ]; then
-            echo "::error file=roles/gemini/defaults/main.yml::gemini_version not found"
+            echo "::error file=roles/gemini/vars/main.yml::gemini_version not found"
             exit 1
           fi
           latest=$(gh api repos/mbrubeck/agate/releases/latest --jq .tag_name)
           latest=${latest#v}
           if [ "$pinned" != "$latest" ]; then
-            echo "::error file=roles/gemini/defaults/main.yml::Agate $latest is out, gemini_version pins $pinned. Bump it and both checksums."
+            echo "::error file=roles/gemini/vars/main.yml::Agate $latest is out, gemini_version pins $pinned. Bump it and both checksums."
             exit 1
           fi
           echo "Agate $pinned is the latest release."

@@ -18,12 +18,15 @@ cgit_fcgiwrap_service: cgit-fcgiwrap
 cgit_vhost_path: "{{ caddy_sites_dir }}/20-cgit.caddy"
 cgit_hsts: "max-age=31536000; includeSubDomains"
 
-cgit_snapshots: "tar.gz zip"
 cgit_cache_size: 1000
 
-# Git uses SHA1 by default, but SHA1 is weak. Repositories created here
-# should use SHA256.
-cgit_object_format: sha256
-
-# Branch that repositories without an upstream are initialized to.
+# ── Deployment choices ────────────────────────────────────────────────
+# Described in inventory/group_vars/all/main.yml, which lists each
+# commented out.
+cgit_root_title: "{{ web_domain }} repositories"
+cgit_root_desc: "public git repositories"
+cgit_default_owner: "{{ admin_user }}"
+cgit_snapshots: "tar.gz zip"
 cgit_initial_branch: main
+cgit_pushers: ["{{ admin_user }}"]
+cgit_repositories: []

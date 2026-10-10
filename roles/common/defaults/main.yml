@@ -9,3 +9,13 @@ common_packages:
 
 common_admin_groups: [sudo]
 common_admin_shell: /bin/bash
+
+# ── SSH access ────────────────────────────────────────────────────────
+# Choices several roles read: common creates the account, ssh_hardening
+# and the firewall let it in, and cgit lets it push. Every role depends
+# on common, so each has one default, here. Unlike vars/main.yml,
+# inventory overrides these; inventory/group_vars/all/main.yml lists and
+# describes each, commented out.
+admin_user: deploy
+ssh_allowed_users: ["{{ admin_user }}"]
+ssh_port: 22

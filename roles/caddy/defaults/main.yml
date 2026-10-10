@@ -9,22 +9,12 @@ caddy_sites_dir: /etc/caddy/sites.d
 caddy_log_dir: /var/log/caddy
 caddy_log: "{{ caddy_log_dir }}/caddy.log"
 
-# Must not be DEBUG. Debug-level lines, such as those about TLS
-# handshakes, record visitor addresses outside the http loggers the
-# Caddyfile leaves out. The tasks refuse DEBUG.
-caddy_log_level: INFO
-
-# The signing key is pinned by checksum; update both together if it
-# changes. deb822_repository depends on python3-debian, so it is
-# installed before the Caddy repository.
+# deb822_repository depends on python3-debian, so it is installed
+# before the Caddy repository. The key's checksum is in vars/main.yml.
 caddy_repo_packages: [python3-debian]
 caddy_repo_key_url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
-caddy_repo_key_checksum: sha256:783dfee04b19e851a928cd87b34710213ebbe7628f98d9f34595ab83be578c00
 caddy_repo_keyring: /etc/apt/keyrings/caddy-stable.asc
 caddy_repo_uri: https://dl.cloudsmith.io/public/caddy/stable/deb/debian
 caddy_repo_suite: any-version
 caddy_repo_component: main
 caddy_repo_origin: cloudsmith/caddy/stable
-caddy_repo_allowed_packages: "{{ caddy_packages }}"
-
-caddy_protocols: [h1, h2, h3]
