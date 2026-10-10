@@ -12,11 +12,17 @@ available to offer clients anonymous means to connect, not to hide the
 server's IP.
 
 ```
-                 ┌──────────── nftables: 22, 80, 443, 1965 ───┐
-   clearnet ───► │  caddy (web, cgit)   ssh   agate (gemini)  │
-   tor      ───► │   :80 :443           :22      :1965        │
-   i2p      ───► │                                            │
-                 └────────────────────────────────────────────┘
+  clearnet                     Tor network         I2P network
+     │ TCP 22, 80, 443, 1965         ▲                 ▲   │ TCP and UDP
+     │ UDP 443 (QUIC)                │                 │   │ i2p_router_port,
+     │                               │    outbound     │   │ if set
+ ┌───▼──────── nftables ─────────────┼─────────────────┼───▼─────────┐
+ │  sshd   :22                      tor              i2pd            │
+ │  caddy  :80 :443   web, cgit      │                 │             │
+ │  agate  :1965      gemini         │                 │             │
+ │    ▲                              │                 │             │
+ │    └─────── over 127.0.0.1 ───────┴─────────────────┘             │
+ └───────────────────────────────────────────────────────────────────┘
 ```
 
 ## Layout
