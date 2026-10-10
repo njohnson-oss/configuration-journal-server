@@ -9,14 +9,14 @@
 	servers {
 		protocols {{ caddy_protocols | join(' ') }}
 	}
+	# Every logger that sees a request is under http: access, handler
+	# errors, the reverse proxy and Go's own server. Leaving them all out
+	# logs no request, failed or not. Caddy's own operation, certificates
+	# included, is still logged.
 	log {
 		output file {{ caddy_log }}
 		level {{ caddy_log_level }}
-		format filter {
-{% for field in caddy_log_redacted_fields %}
-			{{ field }} delete
-{% endfor %}
-		}
+		exclude http
 	}
 }
 

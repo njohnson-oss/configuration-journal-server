@@ -10,6 +10,7 @@
 
 - sshd's key exchange algorithms are set per Debian release instead of probed with `ssh -Q kex` on the host. The probe could only fail on a release the play already refuses.
 - cgit discards its access log, as the website does. It kept one at `/var/log/caddy/cgit.log`, with visitor addresses removed.
+- Neither Caddy nor Agate logs requests, failed ones included. Caddy logged requests that failed with a server error, and Agate a line for every request, though neither with the visitor's address.
 
 ### Fixed
 

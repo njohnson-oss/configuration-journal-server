@@ -9,19 +9,10 @@ caddy_sites_dir: /etc/caddy/sites.d
 caddy_log_dir: /var/log/caddy
 caddy_log: "{{ caddy_log_dir }}/caddy.log"
 
-# Must not be DEBUG. Debug-level lines such as Go's "TLS handshake error
-# from <ip>:<port>" put the address in the message text, where the field
-# filter below cannot reach it. The tasks refuse DEBUG.
+# Must not be DEBUG. Debug-level lines, such as those about TLS
+# handshakes, record visitor addresses outside the http loggers the
+# Caddyfile leaves out. The tasks refuse DEBUG.
 caddy_log_level: INFO
-
-# Deleted from every log entry. These headers are client-supplied and can
-# carry a visitor's real IP address.
-caddy_log_redacted_fields:
-  - request>remote_ip
-  - request>client_ip
-  - request>headers>X-Forwarded-For
-  - request>headers>X-Real-Ip
-  - request>headers>Forwarded
 
 # The signing key is pinned by checksum; update both together if it
 # changes. deb822_repository depends on python3-debian, so it is

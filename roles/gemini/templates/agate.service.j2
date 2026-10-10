@@ -3,8 +3,8 @@
 # is the configuration. Gemini is port {{ gemini_port }}, above 1024, so
 # nothing here ever needs to be root and no privilege drop is involved.
 #
-# --log-ip is deliberately absent. Without it Agate writes "-" where the
-# peer address would go, in request and TLS-error lines alike.
+# Agate logs every request, and failed ones louder. RUST_LOG keeps only
+# its errors, which concern its configuration, never a visitor.
 
 [Unit]
 Description=Agate Gemini server
@@ -14,6 +14,7 @@ Wants=network-online.target
 
 [Service]
 Type=exec
+Environment=RUST_LOG=agate=error
 User={{ gemini_user }}
 Group={{ gemini_group }}
 ExecStart={{ gemini_binary }} \
