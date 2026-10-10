@@ -9,6 +9,7 @@
 ### Changed
 
 - sshd's key exchange algorithms are set per Debian release instead of probed with `ssh -Q kex` on the host. The probe could only fail on a release the play already refuses.
+- cgit discards its access log, as the website does. It kept one at `/var/log/caddy/cgit.log`, with visitor addresses removed.
 
 ### Fixed
 

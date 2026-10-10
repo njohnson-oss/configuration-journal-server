@@ -20,16 +20,6 @@
 	}
 }
 
-# Global options come before any snippet can be defined, so the block
-# above repeats this rather than importing it. Vhosts import it inside their log.
-(redact_ips) {
-	format filter {
-{% for field in caddy_log_redacted_fields %}
-		{{ field }} delete
-{% endfor %}
-	}
-}
-
 (pq_tls) {
 	tls {
 		protocols {{ tls_protocol_min }} {{ tls_protocol_max }}
