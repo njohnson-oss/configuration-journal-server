@@ -157,6 +157,14 @@ publishes. Unattended upgrades update Caddy from there too: by default
 they take only the distribution's own packages, so the role adds Caddy's
 repository to the ones they take from.
 
+**Agate is updated only by a redeploy.** Debian does not package it,
+so the role installs the upstream release binary, pinned by checksum,
+and unattended upgrades cannot update it. That includes its TLS: Agate
+bundles rustls, so TLS fixes for Gemini arrive only with a new Agate
+release. To update, bump `gemini_version` and both checksums in
+`roles/gemini/defaults/main.yml` and redeploy. The `Agate release`
+workflow checks weekly and fails when a newer release is out.
+
 ## Key exchange
 
 * **SSH and HTTPS** are post-quantum only: sshd's `KexAlgorithms` and

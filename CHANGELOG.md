@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- A weekly workflow that fails when Agate has a release newer than the one pinned. Agate is the one service unattended upgrades cannot update, so the README now says so and how to update it.
+
 ### Fixed
 
 - Apt takes only Caddy from Caddy's repository, whatever else it publishes.

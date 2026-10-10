@@ -6,7 +6,9 @@ gemini_packages: [openssl, python3-cryptography, rsync]
 # ── Agate ─────────────────────────────────────────────────────────────
 # Agate is Rust. It is not packaged for Debian, so the release binary is
 # fetched and pinned by checksum. Update the version and the checksums
-# together -- get_url refuses the download if they disagree.
+# together -- get_url refuses the download if they disagree. Unattended
+# upgrades cannot do this; .github/workflows/agate.yml fails when a newer
+# release is out.
 gemini_service: agate
 gemini_version: 3.3.24
 gemini_release_base: "https://github.com/mbrubeck/agate/releases/download"
