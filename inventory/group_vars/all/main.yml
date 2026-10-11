@@ -59,11 +59,12 @@ web_domain: example.com                # CHANGE ME — the site's main domain
 acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
                                            # registered with the ACME CA
 
-# Strict-Transport-Security, sent by the website and cgit on the
-# clearnet. includeSubDomains extends it to every subdomain of the names
-# that send it, web_domain's included, whether or not this server hosts
-# them: drop it if any of those serves plain HTTP.
-# web_hsts: "max-age=31536000; includeSubDomains"
+# Whether the website's and cgit's Strict-Transport-Security covers
+# subdomains. It would reach every subdomain of the names that send it,
+# web_domain's included, whether or not this server hosts them, and
+# browsers would refuse any of those that serves plain HTTP: turn it on
+# only once none does. The max-age is fixed in roles/caddy.
+# web_hsts_include_subdomains: false
 
 # ── Ports ─────────────────────────────────────────────────────────────
 # 80, 443 and 1965 are fixed in roles/common: ACME HTTP-01 and the

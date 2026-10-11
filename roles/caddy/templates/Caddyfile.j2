@@ -40,4 +40,9 @@
 	}
 }
 
+# Strict-Transport-Security, for the TLS sites only.
+(hsts) {
+	header Strict-Transport-Security "max-age={{ caddy_hsts_max_age }}{{ '; includeSubDomains' if web_hsts_include_subdomains else '' }}"
+}
+
 import {{ caddy_sites_dir }}/*.caddy

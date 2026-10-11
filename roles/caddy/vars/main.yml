@@ -18,3 +18,7 @@ caddy_protocols: [h1, h2, h3]
 # record visitor addresses outside the http loggers the Caddyfile leaves
 # out.
 caddy_log_level: INFO
+
+# How long browsers keep to HTTPS after a visit to a clearnet site: a
+# year. Whether that covers subdomains is web_hsts_include_subdomains.
+caddy_hsts_max_age: 31536000

@@ -4,7 +4,7 @@
 {{ ([web_domain] + web_aliases) | join(', ') }} {
 	import pq_tls
 	import security_headers
-	header Strict-Transport-Security "{{ web_hsts }}"
+	import hsts
 	header Onion-Location "http://{{ addresses_onion_hostname }}{uri}"
 
 	root * {{ website_root }}
