@@ -10,7 +10,6 @@ i2p_data_dir: /var/lib/i2pd
 # ── Router settings ───────────────────────────────────────────────────
 # Described in inventory/group_vars/all/main.yml, which lists each
 # commented out.
-i2p_ipv6: true
 i2p_bandwidth: L
 
 # Unset, i2pd.conf leaves each of these out and i2pd applies its own
@@ -19,3 +18,9 @@ i2p_bandwidth: L
 i2p_share: ~
 i2p_transit_tunnels: ~
 i2p_notransit: false
+
+# The address families i2pd reaches other routers over: IPv4 only, as
+# i2pd itself defaults to, so a host without a public IPv6 address works
+# as it is. At least one has to be on; the role refuses both off.
+i2p_ipv4: true
+i2p_ipv6: false

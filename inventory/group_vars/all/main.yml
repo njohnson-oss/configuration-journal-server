@@ -85,9 +85,12 @@ acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
 # its own port, which stays closed — no inbound transit.
 # i2p_router_port: 24567
 
-# Whether i2pd also uses IPv6 to reach other routers. Set false on a
-# host without a public IPv6 address.
-# i2p_ipv6: true
+# The address families i2pd reaches other routers over: IPv4 only, as
+# i2pd itself defaults to. Turn IPv6 on for a host with a public IPv6
+# address, and IPv4 off for one without a public IPv4 address. At least
+# one has to stay on.
+# i2p_ipv4: true
+# i2p_ipv6: false
 
 # Bandwidth and transit. Each transit setting is written to i2pd.conf
 # only when set: left unset, i2pd applies its own default.

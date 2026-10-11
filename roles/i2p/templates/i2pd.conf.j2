@@ -3,8 +3,8 @@
 {% if i2p_bandwidth is not none %}
 bandwidth = {{ i2p_bandwidth }}
 {% endif %}
-ipv4 = true
-ipv6 = {{ i2p_ipv6 }}
+ipv4 = {{ i2p_ipv4 | lower }}
+ipv6 = {{ i2p_ipv6 | lower }}
 {% if i2p_router_port %}
 port = {{ i2p_router_port }}
 {% endif %}

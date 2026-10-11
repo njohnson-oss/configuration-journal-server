@@ -14,9 +14,12 @@ argument_specs:
       i2p_router_port:
         type: int
         description: Port for NTCP2 and SSU2, which makes the router relay.
+      i2p_ipv4:
+        type: bool
+        description: Whether i2pd uses IPv4 to reach other routers.
       i2p_ipv6:
         type: bool
-        description: Whether i2pd also uses IPv6 to reach other routers.
+        description: Whether i2pd uses IPv6 to reach other routers.
       i2p_bandwidth:
         type: str
         description: Bandwidth limit, a class letter or a rate.

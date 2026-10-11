@@ -1,4 +1,14 @@
 ---
+# With both off the router has no transport, and is useless rather than
+# private. Refused before anything is installed.
+- name: Refuse a router with neither IPv4 nor IPv6
+  ansible.builtin.assert:
+    that: i2p_ipv4 or i2p_ipv6
+    fail_msg: >-
+      i2p_ipv4 and i2p_ipv6 are both false, which leaves i2pd no way to
+      reach other routers. Turn on at least one.
+    quiet: true
+
 - name: Install i2pd
   ansible.builtin.apt:
     name: "{{ i2p_packages }}"
