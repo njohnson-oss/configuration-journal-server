@@ -1,0 +1,17 @@
+---
+# The values this role reads from inventory. Ansible checks them before
+# the role's first task, so a missing or mistyped one stops the play
+# there instead of partway through a deploy. Only those without a
+# default are required. The others default in the role responsible for
+# each: this one, or common or addresses, which it depends on.
+argument_specs:
+  main:
+    short_description: Caddy, its global options and shared snippets
+    options:
+      acme_email:
+        type: str
+        required: true
+        description: The contact address registered with the ACME CA.
+      web_hsts_include_subdomains:
+        type: bool
+        description: Whether Strict-Transport-Security covers subdomains.

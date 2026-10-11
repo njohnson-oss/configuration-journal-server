@@ -1,0 +1,17 @@
+---
+# The values this role reads from inventory. Ansible checks them before
+# the role's first task, so a missing or mistyped one stops the play
+# there instead of partway through a deploy. Only those without a
+# default are required; the others' defaults are in defaults/main.yml.
+argument_specs:
+  main:
+    short_description: The admin account and the base system
+    options:
+      admin_user:
+        type: str
+        description: The account Ansible deploys as.
+      admin_authorized_keys:
+        type: list
+        elements: str
+        required: true
+        description: SSH public keys for admin_user, supplied at deploy time.

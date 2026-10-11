@@ -1,0 +1,31 @@
+---
+# The values this role reads from inventory. Ansible checks them before
+# the role's first task, so a missing or mistyped one stops the play
+# there instead of partway through a deploy. Only those without a
+# default are required. The others default in the role responsible for
+# each: this one, or common or addresses, which it depends on.
+argument_specs:
+  main:
+    short_description: The i2pd router and the server's I2P tunnels
+    options:
+      i2p_key_dir:
+        type: str
+        description: Local directory holding web.dat, gemini.dat and cgit.dat.
+      i2p_router_port:
+        type: int
+        description: Port for NTCP2 and SSU2, which makes the router relay.
+      i2p_ipv6:
+        type: bool
+        description: Whether i2pd also uses IPv6 to reach other routers.
+      i2p_bandwidth:
+        type: str
+        description: Bandwidth limit, a class letter or a rate.
+      i2p_share:
+        type: int
+        description: Max % of the bandwidth that transit may use.
+      i2p_transit_tunnels:
+        type: int
+        description: Maximum number of tunnels carried for other routers.
+      i2p_notransit:
+        type: bool
+        description: Whether to decline transit outright.

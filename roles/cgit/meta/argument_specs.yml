@@ -1,0 +1,57 @@
+---
+# The values this role reads from inventory. Ansible checks them before
+# the role's first task, so a missing or mistyped one stops the play
+# there instead of partway through a deploy. Only those without a
+# default are required. The others default in the role responsible for
+# each: this one, or common or addresses, which it depends on.
+argument_specs:
+  main:
+    short_description: cgit and its repositories, served by Caddy
+    options:
+      cgit_domain:
+        type: str
+        description: cgit's clearnet name.
+      ssh_allowed_users:
+        type: list
+        elements: str
+        description: Accounts that may log in over SSH.
+      cgit_root_title:
+        type: str
+        description: Title of the index page.
+      cgit_root_desc:
+        type: str
+        description: Subtitle of the index page.
+      cgit_default_owner:
+        type: str
+        description: Owner shown for a repository that names none.
+      cgit_snapshots:
+        type: str
+        description: Archive formats offered for download, "" for none.
+      cgit_initial_branch:
+        type: str
+        description: The branch a repository without a source starts on.
+      cgit_pushers:
+        type: list
+        elements: str
+        description: Accounts that may push to the repositories without a source.
+      cgit_repositories:
+        type: list
+        elements: dict
+        description: The repositories published, [] for none.
+        options:
+          name:
+            type: str
+            required: true
+            description: Name, and URL path.
+          description:
+            type: str
+            description: One line shown in the index.
+          owner:
+            type: str
+            description: Owner, cgit_default_owner if absent.
+          section:
+            type: str
+            description: Index section it is listed under.
+          source:
+            type: str
+            description: URL it mirrors. Absent, an empty repository to push to.

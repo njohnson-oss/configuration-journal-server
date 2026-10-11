@@ -1,0 +1,28 @@
+---
+# The values this role reads from inventory. Ansible checks them before
+# the role's first task, so a missing or mistyped one stops the play
+# there instead of partway through a deploy. Only those without a
+# default are required; the others' defaults are in defaults/main.yml.
+argument_specs:
+  main:
+    short_description: The .onion and .b32.i2p addresses, from their keys
+    options:
+      web_domain:
+        type: str
+        required: true
+        description: The site's main domain.
+      cgit_domain:
+        type: str
+        description: cgit's clearnet name.
+      gemini_domain:
+        type: str
+        description: The capsule's clearnet name.
+      tor_onion_key_dir:
+        type: str
+        description: Local directory holding hs_ed25519_secret_key.
+      cgit_onion_subdomain:
+        type: str
+        description: The subdomain of the onion that cgit answers on.
+      i2p_key_dir:
+        type: str
+        description: Local directory holding web.dat, gemini.dat and cgit.dat.

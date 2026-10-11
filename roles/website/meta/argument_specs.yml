@@ -1,0 +1,21 @@
+---
+# The values this role reads from inventory. Ansible checks them before
+# the role's first task, so a missing or mistyped one stops the play
+# there instead of partway through a deploy. Only those without a
+# default are required. The others default in the role responsible for
+# each: this one, or common or addresses, which it depends on.
+argument_specs:
+  main:
+    short_description: The website, served by Caddy
+    options:
+      web_domain:
+        type: str
+        required: true
+        description: The site's main domain.
+      web_aliases:
+        type: list
+        elements: str
+        description: Extra names that serve the site, [] for none.
+      website_source:
+        type: str
+        description: Local directory rsynced as the site, "" for a placeholder.
