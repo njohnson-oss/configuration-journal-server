@@ -12,3 +12,10 @@ i2p_data_dir: /var/lib/i2pd
 # commented out.
 i2p_ipv6: true
 i2p_bandwidth: L
+
+# Unset, i2pd.conf leaves each of these out and i2pd applies its own
+# default, transit as i2pd sets it. i2p_router_port is common's, as the
+# firewall reads it too.
+i2p_share: ~
+i2p_transit_tunnels: ~
+i2p_notransit: false

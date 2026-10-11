@@ -3,11 +3,12 @@
 #  Every deployment-specific value is listed here. One with no sensible
 #  default is set, and deploying needs it. Every other is commented out,
 #  showing the default it takes from the defaults/main.yml of the role
-#  responsible for it: roles/common for SSH access, roles/addresses for
-#  names and keys, and otherwise the role that uses it. Uncomment one
-#  only to change it. Roles' defaults/ otherwise carry only
-#  implementation details and tuning: paths, package and service names,
-#  timeouts and limits.
+#  responsible for it: roles/common for SSH access and the ports,
+#  roles/addresses for names and keys, and otherwise the role that uses
+#  it. Uncomment one only to change it. One whose default leaves the
+#  setting to the program it configures shows an example instead.
+#  Roles' defaults/ otherwise carry only implementation details and
+#  tuning: paths, package and service names, timeouts and limits.
 #
 #  The guarantees the README makes are deliberately NOT here: crypto
 #  policy, the ports the stack is pinned to, checksum and apt pins, and
@@ -82,14 +83,14 @@ acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
 # makes it relay traffic for other routers: i2pd binds it for NTCP2 and
 # SSU2, and the firewall opens it to match. Leave it unset and i2pd picks
 # its own port, which stays closed — no inbound transit.
-i2p_router_port: ~
+# i2p_router_port: 24567
 
 # Whether i2pd also uses IPv6 to reach other routers. Set false on a
 # host without a public IPv6 address.
 # i2p_ipv6: true
 
-# Bandwidth and transit. Each of these is written to i2pd.conf only when
-# set: left as ~, i2pd applies its own default.
+# Bandwidth and transit. Each transit setting is written to i2pd.conf
+# only when set: left unset, i2pd applies its own default.
 
 # Router bandwidth limit. L is 32 KB/s, O 256, P 2048, X uncapped; a
 # plain integer is read as KB/s, and a suffixed one (100mb) as a rate.
@@ -101,14 +102,14 @@ i2p_router_port: ~
 # setting that keeps relayed traffic from crowding out your own: raise
 # i2p_bandwidth for the site's benefit and cap share to decide how much
 # strangers get. i2pd default: 100.
-i2p_share: ~
+# i2p_share: 50
 
 # Maximum number of tunnels carried for other routers. i2pd default: 10000.
-i2p_transit_tunnels: ~
+# i2p_transit_tunnels: 2000
 
 # Decline transit outright. The router's own tunnels stay connected, but
 # it relays nothing for strangers. i2pd default: false.
-i2p_notransit: false
+# i2p_notransit: true
 
 # ── Tor onion service ─────────────────────────────────────────────────
 # One onion carries everything: the website on port 80, the capsule on
