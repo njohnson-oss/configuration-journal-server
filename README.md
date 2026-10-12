@@ -55,7 +55,8 @@ first, once each, so a role also works as the only one in a play.
   libsodium23`) — the `onion_address` filter derives the `.onion` from the
   service secret key with libsodium's Ed25519 scalar multiplication.
   `rsync` too, which pushes the site and capsule content.
-* **Target:** Debian 12/13 with Python 3.
+* **Target:** Debian 12/13 that the first run can log in to as root over
+  SSH. The play installs sudo and Python itself if either is missing.
 * Your **SSH client** needs one of the key exchanges sshd offers (see
   Key exchange) — check with `ssh -Q kex | grep -E 'mlkem|sntrup'` before
   you lock yourself out.
