@@ -157,6 +157,15 @@ publishes. Unattended upgrades update Caddy from there too: by default
 they take only the distribution's own packages, so the role adds Caddy's
 repository to the ones they take from.
 
+## Key exchange
+
+* **SSH and HTTPS** are post-quantum only: sshd's `KexAlgorithms` and
+  Caddy's `curves` list nothing else.
+* **Gemini is TLS 1.3 only, not post-quantum.** Agate (as of 3.3.24) uses
+  rustls's `ring` provider, which offers only X25519, P-256 and P-384, and
+  has no option to choose key exchange groups. The hybrid group is
+  enforced for HTTPS only.
+
 ## Verifying
 
 ```sh
