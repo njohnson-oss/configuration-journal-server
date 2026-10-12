@@ -56,8 +56,6 @@ first, once each, so a role also works as the only one in a play.
   service secret key with libsodium's Ed25519 scalar multiplication.
   `rsync` too, which pushes the site and capsule content.
 * **Target:** Debian 12/13 with Python 3.
-* **Caddy ≥ 2.10** for the `x25519mlkem768` curve. Installed from the
-  official Caddy repository by the role, so this is satisfied by default.
 * Your **SSH client** needs one of the key exchanges sshd offers (see
   Key exchange) — check with `ssh -Q kex | grep -E 'mlkem|sntrup'` before
   you lock yourself out.
@@ -181,7 +179,9 @@ workflow checks weekly and fails when a newer release is out.
   `sntrup761x25519-sha512@openssh.com` on Debian 12 (OpenSSH 9.2), and
   `mlkem768x25519-sha256` too on Debian 13 (OpenSSH 10.0).
 * **HTTPS** is post-quantum only: Caddy's `tls` directive sets `curves`
-  to the hybrid `x25519mlkem768` group alone.
+  to the hybrid `x25519mlkem768` group alone. That group needs
+  Caddy ≥ 2.10, which the role gets by installing Caddy from Caddy's
+  own repository (see Updates).
 * **Gemini is TLS 1.3 only, not post-quantum.** Agate (as of 3.3.24) uses
   rustls's `ring` provider, which offers only X25519, P-256 and P-384, and
   has no option to choose key exchange groups. The hybrid group is
