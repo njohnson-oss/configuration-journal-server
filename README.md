@@ -172,7 +172,9 @@ and unattended upgrades cannot update it. That includes its TLS: Agate
 bundles rustls, so TLS fixes for Gemini arrive only with a new Agate
 release. To update, bump `gemini_version` and both checksums in
 `roles/gemini/vars/main.yml` and redeploy. The `Agate release`
-workflow checks weekly and fails when a newer release is out.
+workflow checks weekly and fails when a newer release is out:
+
+[![Agate release](https://github.com/njohnson-oss/configuration-journal-server/actions/workflows/agate.yml/badge.svg?branch=main)](https://github.com/njohnson-oss/configuration-journal-server/actions/workflows/agate.yml)
 
 ## Key exchange
 
