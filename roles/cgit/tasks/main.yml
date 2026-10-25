@@ -168,6 +168,16 @@
   loop_control:
     label: "{{ item.name }}"
 
+# Only colours, overriding those of cgit's own stylesheet, which it is
+# served beside and which still lays out every page.
+- name: Install the dark theme
+  ansible.builtin.copy:
+    src: cgit-dark.css
+    dest: "{{ cgit_static_dir }}/cgit-dark.css"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Write the cgit configuration
   ansible.builtin.template:
     src: cgitrc.j2
