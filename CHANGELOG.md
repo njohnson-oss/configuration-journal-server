@@ -8,6 +8,7 @@
 
 ### Changed
 
+- `addresses` runs with a tag only for the roles that need it, as their dependency. It ran with any tags, so the content tags, `ssh` and `firewall` needed the onion and I2P keys too. A full run still runs it first, refusing a missing key before anything is deployed.
 - cgit is always dark, whatever the browser prefers. Its stylesheet is upstream's dark theme, which no release has yet, loaded after Debian's `cgit.css`, whose colours it overrides.
 
 ## [2.0.0] - 2026-10-18

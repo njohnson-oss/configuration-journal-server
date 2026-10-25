@@ -136,8 +136,8 @@ deployed, use `--tags content`, or `--tags web_content` or
 `--tags gemini_content` for one of them. These sync each from its
 `website_source` or `gemini_capsule_source`, and leave one without a
 source as it is. Besides that they run only what runs with any tags:
-`addresses` and each role's check of its inventory values, neither of
-which changes the host.
+the check that sudo and Python are installed, and each role's check of
+its inventory values.
 
 ## Publishing repositories
 

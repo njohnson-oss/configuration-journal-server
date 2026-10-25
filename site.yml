@@ -29,9 +29,10 @@
   # list only sets the order.
   roles:
     # First, though only the transports and services need it, so that a
-    # missing key is refused before anything is deployed.
+    # full run refuses a missing key before anything is deployed. Untagged:
+    # a run with tags runs it as a dependency of a role that needs it,
+    # and not at all for one that does not, such as the content tags.
     - role: addresses
-      tags: [always]
     # Order matters: open the firewall, harden sshd, then bring the
     # transports up before the services that advertise their addresses.
     # Every other role depends on common, so it runs with any tags. A tag
