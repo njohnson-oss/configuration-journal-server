@@ -26,18 +26,24 @@
 
   # Each role lists the roles it needs in its meta/main.yml, and Ansible
   # runs those first, once each, so any of them also runs alone. This
-  # list only sets the order.
+  # list sets the order, and the tags each runs with.
+  #
+  # A role another role needs is tagged here with the tags of every role
+  # that needs it. Its arguments check runs with any tags, so this entry
+  # runs that check, and Ansible then counts the role as run and skips it
+  # where a role needs it. Here it is a separate entry from those, so it
+  # can run twice; the second time changes nothing.
   roles:
     # First, though only the transports and services need it, so that a
-    # full run refuses a missing key before anything is deployed. Untagged:
-    # a run with tags runs it as a dependency of a role that needs it,
-    # and not at all for one that does not, such as the content tags.
+    # missing key is refused before anything is deployed. The content
+    # tags need none of it.
     - role: addresses
+      tags: [tor, i2p, web, gemini, cgit]
     # Order matters: open the firewall, harden sshd, then bring the
     # transports up before the services that advertise their addresses.
-    # Every other role depends on common, so it runs with any tags. A tag
-    # here would make it a second, separate entry, run twice.
+    # Every other role needs common. The content tags do not.
     - role: common
+      tags: [firewall, ssh, tor, i2p, caddy, web, gemini, cgit]
     # Each with both tags: the firewall admits only ssh_port, so after a
     # change to it, running either role without the other locks the next
     # connection out.

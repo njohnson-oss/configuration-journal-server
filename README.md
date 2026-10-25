@@ -128,8 +128,8 @@ ansible_port: 22  # or whatever you set ssh_port to
 Useful tag selections: `--tags web`, `--tags gemini`, `--tags cgit`,
 `--tags ssh`. `ssh` and `firewall` each run both roles, so a change to
 `ssh_port` reaches sshd and the firewall together. Every role depends on
-`common`, so a run with tags runs it too, and needs
-`admin_authorized_keys` as a full run does.
+`common`, so a run with tags runs it too, except the content tags below.
+Every run needs `admin_authorized_keys`, as a full run does.
 
 To update only the website and capsule content on a host already
 deployed, use `--tags content`, or `--tags web_content` or

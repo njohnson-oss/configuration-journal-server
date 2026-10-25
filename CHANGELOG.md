@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- `--tags tor`, `i2p`, `web`, `gemini` and `cgit` work again. Since 2.1.0 they failed at the first task that uses an address, such as cgit's `addresses_cgit_onion_hostname`, as undefined. 2.1.0 left `addresses` to run as those roles' dependency, but Ansible skipped it there, having counted it as run when its arguments check ran. It runs with their tags again, though still not with the content tags, `ssh` or `firewall`.
+- A run with tags runs `common` too, as 2.0.0 meant it to: the Debian check, the admin account with its keys and sudo, and unattended upgrades. Until now only its arguments check ran, for the same reason. It runs with every tag but the content ones, and, like `addresses`, can run twice, the second time changing nothing.
+
 ## [2.1.0] - 2026-10-25
 
 ### Added
