@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.1.1] - 2026-10-25
 
 ### Fixed
 
@@ -59,6 +59,7 @@
 
 - Initial release: nine roles deploying a hardened Debian web, Gemini and Git server over clearnet, Tor and I2P.
 
+[2.1.1]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/njohnson-oss/configuration-journal-server/releases/tag/v1.0.0
