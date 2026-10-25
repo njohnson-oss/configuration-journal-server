@@ -237,6 +237,11 @@
 # ── Content ───────────────────────────────────────────────────────────
 # The deploy below mirrors the source, deleting whatever it lacks, so a
 # wrong or empty source would take the whole capsule down.
+#
+# Tagged so that --tags content or gemini_content updates the capsule
+# without the rest of the deploy, on a host already deployed. The
+# placeholder is not, so such a run without a source leaves the capsule
+# as it is.
 - name: Refuse to mirror a capsule source with no index
   ansible.builtin.assert:
     that:
@@ -246,6 +251,7 @@
       what is probably the wrong or an empty directory over the capsule.
     quiet: true
   when: gemini_capsule_source | length > 0
+  tags: [content, gemini_content]
 
 - name: Deploy the supplied capsule content
   ansible.posix.synchronize:
@@ -256,6 +262,7 @@
       - "--chown=root:{{ gemini_group }}"
       - "--chmod=D0750,F0640"
   when: gemini_capsule_source | length > 0
+  tags: [content, gemini_content]
 
 - name: Deploy a placeholder capsule when no content was supplied
   ansible.builtin.template:

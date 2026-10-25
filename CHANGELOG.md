@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- The `content` tag syncs the website and capsule from their sources without the rest of the deploy, and `web_content` and `gemini_content` sync one each. One without a source is left as it is. `--tags web` and `--tags gemini` ran their whole roles and `common` to do it.
+
 ### Changed
 
 - cgit is always dark, whatever the browser prefers. Its stylesheet is upstream's dark theme, which no release has yet, loaded after Debian's `cgit.css`, whose colours it overrides.
