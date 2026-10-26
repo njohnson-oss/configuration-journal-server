@@ -32,7 +32,7 @@ server's IP.
 | `site.yml` | installs sudo and Python, then runs the roles in order |
 | `inventory/group_vars/all/main.yml` | **every** deployment-specific value |
 | `filter_plugins/tor.py` | derives a `.onion` address from a v3 service secret key |
-| `filter_plugins/i2p.py` | derives a `.b32.i2p` address from a destination key |
+| `filter_plugins/i2p.py` | derives a `.b32.i2p` address from a destination key, and reads when a short-term one expires |
 | `roles/addresses` | the names the server publishes: checks the onion and I2P keys exist and derives the addresses from them |
 | `roles/common` | what every role builds on: refuses anything but Debian 12 and 13, holds the invariants (not user-modifiable settings) and SSH access, installs base packages, creates the admin account, enables unattended upgrades |
 | `roles/firewall` | nftables, default-deny inbound |
@@ -96,6 +96,21 @@ leave tor with a public key that contradicts its secret one.
 let i2pd create them and copy `/var/lib/i2pd/*.dat`. The playbook derives
 the `.b32.i2p` address from the key on the controller.
 
+i2pd can also sign with a short-term key, so that the destination's own
+key never reaches the server. Keep that key offline, and sign a
+short-term one from it with i2pd-tools' `offlinekeys`, which is valid for
+a year unless you give it fewer days:
+
+```sh
+offlinekeys secrets/i2p/web.dat /path/to/offline/web.dat 7 90  # EdDSA, 90 days
+```
+
+The address stays the destination's. Once the short-term key expires,
+other routers reject the destination's leasesets, and newer i2pd will
+not even load the key, so the playbook refuses an expired one and shows
+when each one expires. Replace it before then with `--tags i2p_keys`
+(see Deploying).
+
 **Gemini certificates.** Optional. List them per hostname in
 `gemini_certificates`. Any hostname not listed gets a 10-year
 self-signed Ed25519 certificate generated on the host. Gemini is
@@ -138,6 +153,11 @@ deployed, use `--tags content`, or `--tags web_content` or
 source as it is. Besides that they run only what runs with any tags:
 the check that sudo and Python are installed, and each role's check of
 its inventory values.
+
+To rotate the short-term I2P keys (see I2P destination keys), sign new
+ones into `i2p_key_dir` and use `--tags i2p_keys`. It installs only the
+destination keys and restarts i2pd if any changed. The destinations are
+unreachable until i2pd has rebuilt their tunnels.
 
 ## Publishing repositories
 

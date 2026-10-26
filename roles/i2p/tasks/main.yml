@@ -16,6 +16,43 @@
     update_cache: true
     cache_valid_time: 3600
 
+# A key from i2pd-tools' offlinekeys signs with a short-term key that
+# the destination's own, kept offline, signed until a date. Past it,
+# other routers reject the destination's leasesets, and newer i2pd will
+# not even load the key, so the destination goes dark. An expired one is
+# refused before it replaces a working key on the host.
+#
+# Tagged so that --tags i2p_keys installs a replacement without the rest
+# of the deploy, on a host already deployed.
+- name: Refuse a destination key whose offline signature has expired
+  ansible.builtin.assert:
+    that: i2p_key_expiry is none or i2p_key_expiry > now().timestamp()
+    fail_msg: >-
+      the offline signature of {{ i2p_key_dir }}/{{ item.name }}.dat
+      expired at {{ '%Y-%m-%d %H:%M UTC' | strftime(i2p_key_expiry, utc=true) }},
+      and the destination would stop working. Sign a new one with
+      offlinekeys.
+    quiet: true
+  vars:
+    i2p_key_expiry: "{{ (i2p_key_dir ~ '/' ~ item.name ~ '.dat') | i2p_offline_expiry }}"
+  loop: "{{ i2p_server_tunnels }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: [i2p_keys]
+
+- name: Show when each offline-signed destination key expires
+  ansible.builtin.debug:
+    msg: >-
+      {{ item.name }}.dat expires at
+      {{ '%Y-%m-%d %H:%M UTC' | strftime(i2p_key_expiry, utc=true) }}
+  when: i2p_key_expiry is not none
+  vars:
+    i2p_key_expiry: "{{ (i2p_key_dir ~ '/' ~ item.name ~ '.dat') | i2p_offline_expiry }}"
+  loop: "{{ i2p_server_tunnels }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: [i2p_keys]
+
 - name: Install the destination keys
   ansible.builtin.copy:
     src: "{{ i2p_key_dir }}/{{ item.name }}.dat"
@@ -28,6 +65,7 @@
     label: "{{ item.name }}"
   no_log: true
   notify: restart i2pd
+  tags: [i2p_keys]
 
 - name: Write the router configuration
   ansible.builtin.template:

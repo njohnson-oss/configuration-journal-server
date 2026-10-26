@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- The `i2p_keys` tag installs the I2P destination keys without the rest of the deploy, and restarts i2pd if any changed. With it, you can replace short-term keys signed with i2pd-tools' `offlinekeys` before they expire, while the destination's own key stays offline. Every run that installs the keys refuses one whose short-term key has expired, which would take the destination off the network, and shows when each short-term key expires.
+
 ## [2.1.1] - 2026-10-25
 
 ### Fixed

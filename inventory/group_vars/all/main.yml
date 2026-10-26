@@ -130,7 +130,9 @@ acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
 # One destination per service: a .b32.i2p address takes no subdomains,
 # so they cannot share one the way they share the onion. The directory
 # must contain web.dat, gemini.dat and cgit.dat, each an i2pd
-# destination key. The .b32.i2p addresses are derived from them.
+# destination key, or a short-term key signed with offlinekeys (see "I2P
+# destination keys" in README.md). The .b32.i2p addresses are derived
+# from them.
 # i2p_key_dir: "{{ secrets_dir }}/i2p"
 
 # ── Gemini capsule ────────────────────────────────────────────────────
