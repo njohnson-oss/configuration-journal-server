@@ -10,10 +10,10 @@
 # get_url refuses the download if they disagree. Unattended upgrades
 # cannot do this; .github/workflows/agate.yml fails when a newer release
 # is out.
-gemini_version: 3.3.24
+gemini_version: 3.3.25
 gemini_release_checksums:
-  x86_64-unknown-linux-gnu: 32379846ff14ce980377455bd935dd8635c56c61a0f336fb76aa461195110404
-  aarch64-unknown-linux-gnu: 5e5e2f81d127da77a4b12e78d3d06e28b639246103bf9e8508bdb0103429b8f2
+  x86_64-unknown-linux-gnu: 37af86aea6565dd485aaa308c693966dfe539c5c82af5fdb784a126429320db1
+  aarch64-unknown-linux-gnu: 9487eb6d12e2dbd66941e018c237c1c0190b7a346ba82cfd1d9bd7e6d9975d28
 
 # Matches the clearnet minimum TLS version in roles/common.
 gemini_only_tls13: true
