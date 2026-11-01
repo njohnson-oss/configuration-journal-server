@@ -133,7 +133,11 @@ ansible-galaxy install -r requirements.yml
 ansible-playbook site.yml -e '{"admin_authorized_keys":["ssh-ed25519 AAAA... you@laptop"]}'
 ```
 
-After the first run, switch the inventory to the hardened account:
+The first run logs in as root. Once sshd refuses root, it carries on as
+`admin_user` on `ssh_port`, so the rest of the play, the content rsync
+included, gets in. Set root in the inventory, not with `-e ansible_user=root`,
+which the play cannot override. After the first run, switch the inventory
+to the hardened account:
 
 ```yaml
 ansible_user: deploy

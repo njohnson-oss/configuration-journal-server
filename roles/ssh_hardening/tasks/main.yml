@@ -55,3 +55,24 @@
     name: "{{ ssh_hardening_service }}"
     enabled: true
     state: started
+
+# sshd now refuses root and may have moved port. The open connection
+# outlives the restart, but anything that logs in afresh, synchronize's
+# rsync or a reconnect after ControlPersist lapses, would still use the
+# inventory's account and port. Apply the change now and carry on as an
+# account it lets in. A first run logs in as root, so it switches to
+# admin_user here; set_fact outranks inventory, but not -e.
+- name: Apply the firewall and sshd changes
+  ansible.builtin.meta: flush_handlers
+
+- name: Log in as an allowed account on ssh_port from here on
+  ansible.builtin.set_fact:
+    ansible_user: "{{ ansible_user if ansible_user | default('') in ssh_allowed_users else admin_user }}"
+    ansible_port: "{{ ssh_port }}"
+
+- name: Drop the connection made before sshd was hardened
+  ansible.builtin.meta: reset_connection
+
+- name: Wait for sshd to accept the new login
+  ansible.builtin.wait_for_connection:
+    timeout: "{{ ssh_hardening_reconnect_timeout }}"

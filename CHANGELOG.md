@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.1] - 2026-11-01
+
+### Fixed
+
+- A first run with `website_source` or `gemini_capsule_source` set goes through to the end. It failed at the first content sync: sshd, restarted partway through the play, refused rsync's new login as root. Once sshd is restarted, the play now carries on as `admin_user` on `ssh_port`, so anything that logs in afresh gets in. A run that changes `ssh_port` no longer has rsync try the old, closed port either. Set the first run's root in the inventory, not with `-e ansible_user=root`, which the play cannot override.
+
 ## [2.2.0] - 2026-10-27
 
 ### Added
@@ -69,6 +75,7 @@
 
 - Initial release: nine roles deploying a hardened Debian web, Gemini and Git server over clearnet, Tor and I2P.
 
+[2.2.1]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.0.0...v2.1.0
