@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- A workflow that publishes a release for each pushed version tag, with the tag's message as its notes. The tag must be annotated, since a lightweight one has no message.
+
 ## [2.2.1] - 2026-11-01
 
 ### Fixed
