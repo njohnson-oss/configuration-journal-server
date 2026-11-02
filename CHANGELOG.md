@@ -1,10 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## [2.3.0] - 2026-11-02
 
 ### Added
 
 - A workflow that publishes a release for each pushed version tag, with the tag's message as its notes. The tag must be annotated, since a lightweight one has no message.
+
+### Changed
+
+- The website's aliases, by default the `www` subdomain of `web_domain`, redirect permanently to the same path on `web_domain` instead of serving the site too, so the site has one address. They keep its TLS policy and HSTS. Redeploy, or run `--tags web`, to get it.
 
 ## [2.2.1] - 2026-11-01
 
@@ -81,6 +85,7 @@
 
 - Initial release: nine roles deploying a hardened Debian web, Gemini and Git server over clearnet, Tor and I2P.
 
+[2.3.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.1.0...v2.1.1
