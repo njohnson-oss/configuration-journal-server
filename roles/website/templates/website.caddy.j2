@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
 # ── Clearnet ──────────────────────────────────────────────────────────
-{{ ([web_domain] + web_aliases) | join(', ') }} {
+{{ web_domain }} {
 	import pq_tls
 	import security_headers
 	import hsts
@@ -18,6 +18,22 @@
 	}
 }
 
+{% if web_aliases %}
+# The aliases, such as www, redirect to web_domain, so the site has one
+# address. They keep the TLS policy and HSTS, which browsers apply per
+# name.
+{{ web_aliases | join(', ') }} {
+	import pq_tls
+	import security_headers
+	import hsts
+	redir https://{{ web_domain }}{uri} permanent
+
+	log {
+		output discard
+	}
+}
+
+{% endif %}
 # ── Tor and I2P ───────────────────────────────────────────────────────
 # Plain HTTP: both networks encrypt the transport themselves and the
 # address *is* the key, so TLS would add nothing and HSTS would be wrong

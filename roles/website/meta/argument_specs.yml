@@ -15,7 +15,7 @@ argument_specs:
       web_aliases:
         type: list
         elements: str
-        description: Extra names that serve the site, [] for none.
+        description: Extra names that redirect to web_domain, [] for none.
       website_source:
         type: str
         description: Local directory rsynced as the site, "" for a placeholder.

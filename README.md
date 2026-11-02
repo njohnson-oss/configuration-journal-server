@@ -40,7 +40,7 @@ server's IP.
 | `roles/tor` | the onion service, from a user-supplied key |
 | `roles/i2p` | i2pd server tunnels from user-supplied keys |
 | `roles/caddy` | global config, TLS policy, shared snippets |
-| `roles/website` | content + vhosts (clearnet, onion, I2P) |
+| `roles/website` | content + vhosts (clearnet, onion, I2P); `web_aliases`, such as www, redirect to `web_domain` |
 | `roles/gemini` | Agate, certificates, capsule content |
 | `roles/cgit` | repositories, fcgiwrap under its own user, vhosts |
 
@@ -238,6 +238,7 @@ nmap -Pn -p- example.com
 # hidden transports
 torsocks curl -I http://<onion>/
 curl -sI https://example.com/ | grep -i onion-location  # Tor Browser's "onion available"
+curl -sI https://www.example.com/ | grep -i location     # redirects to https://example.com/
 curl -I http://<b32>.b32.i2p/ --proxy http://127.0.0.1:4444  # via a local i2pd
 
 # cgit clones over smart HTTP, on every transport

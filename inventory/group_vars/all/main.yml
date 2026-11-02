@@ -53,8 +53,8 @@ admin_authorized_keys: []          # REQUIRED — list of SSH public keys.
 
 # ── Public names ──────────────────────────────────────────────────────
 web_domain: example.com                # CHANGE ME — the site's main domain
-# web_aliases: ["www.{{ web_domain }}"]  # extra names that serve the
-#                                        # site; [] for none
+# web_aliases: ["www.{{ web_domain }}"]  # extra names that redirect
+#                                        # to web_domain; [] for none
 # cgit_domain: "git.{{ web_domain }}"
 # gemini_domain: "{{ web_domain }}"
 acme_email: "hostmaster@{{ web_domain }}"  # CHANGE ME — the contact address
