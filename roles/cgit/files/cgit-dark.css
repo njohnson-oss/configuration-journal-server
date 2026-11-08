@@ -4,9 +4,12 @@
  * cgit has none.
  *
  * Added for this playbook: cgit applies the theme only when the browser
- * prefers a dark color scheme. Here it applies always, loaded after
- * Debian's cgit.css.
+ * prefers a dark color scheme. Here it applies always, over Debian's
+ * cgit.css, which it imports: cgitrc names only this stylesheet, as
+ * Debian 12's cgit links only the last css= it is given.
  */
+
+@import url("cgit.css");
 
 :root { color-scheme: dark; }
 html, div#cgit { color: #eee; background: #171717; }

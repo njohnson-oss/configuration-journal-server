@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- cgit's pages are laid out on Debian 12 too. Since 2.1.0 they were linked only to the dark theme, which sets colours alone, as Debian 12's cgit links only the last stylesheet it is given. The dark theme now imports `cgit.css` itself, and is the only stylesheet cgit links. Redeploy, or run `--tags cgit`, to get it.
+
 ## [2.3.1] - 2026-11-08
 
 ### Fixed
