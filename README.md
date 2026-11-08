@@ -180,7 +180,8 @@ An entry with `source` is mirrored and re-fetched on every run; an entry
 without one is created as an empty bare repository that the accounts in
 `cgit_pushers` (`admin_user` by default) push to over SSH:
 `git remote add origin deploy@host:/srv/git/dotfiles.git`. The play adds
-them to the `cgit` group and shares the repositories with it.
+them to the `cgit` group and shares the repositories with it. Force pushes
+are allowed.
 
 The index's Idle column shows each repository's newest commit, not when it
 was last pushed or fetched: cgit's `post-receive.agefile` hook writes that

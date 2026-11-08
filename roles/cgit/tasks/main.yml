@@ -114,6 +114,28 @@
   loop_control:
     label: "{{ item.name }}"
 
+# --shared=group also sets receive.denyNonFastforwards, which refuses
+# every force push. Pushers own their history, so let them rewrite it,
+# in the repositories initialised before this task too.
+- name: Let the pushers force-push
+  ansible.builtin.shell:
+    cmd: |
+      set -eo pipefail
+      case "$(git config --type=bool --get receive.denyNonFastforwards || true)" in
+        ''|false) exit 0 ;;
+      esac
+      git config receive.denyNonFastforwards false
+      echo changed
+    chdir: "{{ cgit_repo_root }}/{{ item.name }}.git"
+    executable: /bin/bash
+  become: true
+  become_user: "{{ cgit_user }}"
+  register: cgit_force_push
+  changed_when: cgit_force_push.stdout == 'changed'
+  loop: "{{ cgit_repositories | rejectattr('source', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
 # git-receive-pack refuses a repository its user does not own, and these
 # are cgit's. Listed one by one: safe.directory takes no wildcard before
 # git 2.46.
