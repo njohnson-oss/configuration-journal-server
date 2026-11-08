@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.1] - 2026-11-08
+
+### Fixed
+
+- `cgit_pushers` can force-push to the repositories without a `source`. Since 2.0.0, `git init --shared=group` had them refuse every non-fast-forward push. Redeploy, or run `--tags cgit`, to allow it, in repositories created by earlier runs too.
+
 ## [2.3.0] - 2026-11-02
 
 ### Added
@@ -85,6 +91,7 @@
 
 - Initial release: nine roles deploying a hardened Debian web, Gemini and Git server over clearnet, Tor and I2P.
 
+[2.3.1]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.1.1...v2.2.0
