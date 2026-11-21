@@ -158,6 +158,10 @@ source as it is. Besides that they run only what runs with any tags:
 the check that sudo and Python are installed, and each role's check of
 its inventory values.
 
+A `404.html` at the top of `website_source` is served, with status 404,
+for any page the site lacks. Without one, a missing page gets an empty
+404.
+
 To rotate the short-term I2P keys (see I2P destination keys), sign new
 ones into `i2p_key_dir` and use `--tags i2p_keys`. It installs only the
 destination keys and restarts i2pd if any changed. The destinations are

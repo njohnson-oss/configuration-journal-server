@@ -3,6 +3,8 @@ website_packages: [rsync]
 website_root: "/srv/www/{{ web_domain }}"
 website_vhost_path: "{{ caddy_sites_dir }}/10-website.caddy"
 website_index: [index.html, index.htm]
+# Served for a missing page, if the site has it. Relative to website_root.
+website_error_page: /404.html
 
 # Described in inventory/group_vars/all/main.yml, which lists it
 # commented out.

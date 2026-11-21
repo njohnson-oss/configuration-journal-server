@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- The website serves its own `404.html`, when it has one, for a page it lacks, with status 404, on every transport. Without one it still sends Caddy's empty 404. `website_error_page` names another page, relative to the site's root. Redeploy, or run `--tags web`, to get it.
+
 ## [2.3.2] - 2026-11-08
 
 ### Fixed

@@ -1,5 +1,27 @@
 # {{ ansible_managed }}
 
+# The site's files, served the same on every transport.
+(website_files) {
+	root * {{ website_root }}
+	file_server {
+		index {{ website_index | join(' ') }}
+	}
+	encode zstd gzip
+
+	# A missing page gets the site's own error page, when it has one,
+	# still with status 404. Without one, Caddy's empty 404 is sent.
+	# The error routes run apart from the ones above, so they compress
+	# the page themselves.
+	handle_errors 404 {
+		@error_page file {{ website_error_page }}
+		handle @error_page {
+			rewrite * {{ website_error_page }}
+			file_server
+			encode zstd gzip
+		}
+	}
+}
+
 # ── Clearnet ──────────────────────────────────────────────────────────
 {{ web_domain }} {
 	import pq_tls
@@ -7,11 +29,7 @@
 	import hsts
 	header Onion-Location "http://{{ addresses_onion_hostname }}{uri}"
 
-	root * {{ website_root }}
-	file_server {
-		index {{ website_index | join(' ') }}
-	}
-	encode zstd gzip
+	import website_files
 
 	log {
 		output discard
@@ -41,11 +59,7 @@
 http://{{ addresses_onion_hostname }}, http://{{ addresses_i2p.web }} {
 	import security_headers
 
-	root * {{ website_root }}
-	file_server {
-		index {{ website_index | join(' ') }}
-	}
-	encode zstd gzip
+	import website_files
 
 	log {
 		output discard
