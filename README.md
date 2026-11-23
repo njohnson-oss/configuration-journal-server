@@ -43,6 +43,7 @@ server's IP.
 | `roles/website` | content + vhosts (clearnet, onion, I2P); `web_aliases`, such as www, redirect to `web_domain` |
 | `roles/gemini` | Agate, certificates, capsule content |
 | `roles/cgit` | repositories, fcgiwrap under its own user, vhosts |
+| `molecule/default` | the test scenario: deploys to Debian containers and checks the result |
 
 Each role's `meta/main.yml` lists the roles it needs, such as `common`
 for every role and `caddy` for the website and cgit. Ansible runs those
@@ -252,3 +253,44 @@ git clone https://git.example.com/dotfiles.git
 torsocks git clone http://git.<onion>/dotfiles.git
 git -c http.proxy=http://127.0.0.1:4444 clone http://<cgit-b32>.b32.i2p/dotfiles.git  # cgit's own destination
 ```
+
+## Testing
+
+```sh
+pip install molecule==26.11.0 'molecule-plugins[docker]==26.11.0' requests==2.34.2
+molecule test
+```
+
+On top of the controller requirements above, this needs Docker. `molecule
+test` boots Debian 12 and 13 containers (privileged, for nftables and the
+units' sandboxing), deploys `site.yml` to each, then runs it again to check
+that nothing changes.
+
+The containers are images from `molecule/default/Dockerfile`: systemd and sshd,
+without sudo or Python, so the first play's bootstrap is tested as well.
+Molecule's docker driver builds and boots them from the `platforms` in
+`molecule.yml`, one per release.
+
+The throwaway keys come from the tools suggested above: tor writes the onion
+key and i2pd the I2P destination keys, both run offline in a container built
+from `keygen.Dockerfile` (`molecule/default/keygen.sh`), and community.crypto's
+`openssh_keypair` writes the admin's login key. They go under Molecule's
+ephemeral directory; `secrets/` is never read. The deployment uses the real
+`inventory/group_vars/all/main.yml`, overridden only where
+`molecule/default/inventory/group_vars/journal/molecule.yml` says.
+
+What the scenario cannot cover: it never asks a public CA for
+certificates (the names are `.localhost`, which Caddy serves from its
+internal CA), and containers do not enforce AppArmor.
+
+Nor does it connect the way a deployment does. Molecule writes its own
+`ansible.cfg`, so the repository's `pipelining = True` never applies, and it
+reaches each container as root through `docker exec`. A deployment connects
+over SSH, and from its second run on as the admin on `ssh_port`, an
+unprivileged user that becomes root through sudo. That path is untested, and
+it is the one pipelining matters for: the tasks that run as `cgit` or `caddy`
+(`become_user`) get their module through pipelining, rather than from a
+temporary file of the admin's that those users cannot read.
+
+While iterating, `molecule converge` reruns the play on the existing
+containers; `molecule destroy` removes them and the keys.

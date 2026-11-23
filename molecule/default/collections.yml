@@ -1,0 +1,7 @@
+---
+# Test-only collections; the playbook's own are in /requirements.yml. The
+# docker driver's create.yml also needs ansible.posix, for synchronize,
+# which /requirements.yml already pins.
+collections:
+  - name: community.docker
+    version: "==5.4.0"

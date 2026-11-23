@@ -1,0 +1,57 @@
+---
+# Deploys site.yml to a Debian 12 and a Debian 13 container, then checks
+# that a second run changes nothing. See "Testing" in README.md.
+#
+# The docker driver (molecule-plugins) builds and boots the containers from
+# `platforms`; inventory/ adds the group's and the hosts' variables to the
+# inventory it writes.
+driver:
+  name: docker
+
+platforms:
+  # A minimal Debian server with systemd and sshd, but neither sudo nor
+  # Python, so the play's bootstrap is tested as well. It boots /sbin/init,
+  # which needs the container privileged (nftables, the units' sandboxing)
+  # and its own cgroup namespace. The ruleset still lands in the container's
+  # own network namespace, never the host's.
+  - &host
+    name: debian12
+    image: docker.io/library/debian:12
+    dockerfile: Dockerfile
+    buildargs:
+      BASE_IMAGE: docker.io/library/debian:12
+    override_command: false
+    privileged: true
+    cgroupns_mode: private
+    groups: [journal]
+  - <<: *host
+    name: debian13
+    image: docker.io/library/debian:13
+    buildargs:
+      BASE_IMAGE: docker.io/library/debian:13
+
+dependency:
+  name: shell
+  command: ansible-galaxy collection install -r ${MOLECULE_SCENARIO_DIRECTORY}/collections.yml
+
+ansible:
+  cfg:
+    defaults:
+      # Molecule writes its own ansible.cfg, so the repository's is not read.
+      # Roles and filter plugins are found next to site.yml regardless.
+      callback_result_format: yaml
+  executor:
+    args:
+      ansible_playbook:
+        - --inventory=${MOLECULE_SCENARIO_DIRECTORY}/inventory
+
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - destroy

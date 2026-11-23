@@ -1,0 +1,60 @@
+---
+# The hosts are left as the image built them: bootstrapping a bare Debian
+# is the play's job, and part of what is under test.
+- name: Prepare
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  gather_subset: [min]
+
+  vars:
+    secrets_dir: "{{ hostvars[groups['journal'][0]].secrets_dir }}"
+
+  tasks:
+    # Python is not there yet, so this asks systemd through docker instead.
+    - name: Wait for systemd to finish booting
+      ansible.builtin.command:
+        argv: [docker, exec, "{{ item }}", systemctl, is-system-running, --wait]
+      changed_when: false
+      loop: "{{ groups['journal'] }}"
+
+    - name: Build the key generation image
+      community.docker.docker_image_build:
+        name: molecule-journal
+        tag: keygen
+        path: "{{ molecule_scenario_directory }}"
+        dockerfile: keygen.Dockerfile
+        rebuild: always
+
+    - name: Create the secrets directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0700"
+      loop:
+        - "{{ secrets_dir }}"
+        - "{{ secrets_dir }}/ssh"
+
+    # As the controller's user, so the files are its own to read and
+    # delete, and with no network: neither tool needs one to make keys.
+    - name: Generate the onion and I2P keys a user would supply in secrets/
+      community.docker.docker_container:
+        name: molecule-journal-keygen
+        image: molecule-journal:keygen
+        command: [keygen, /secrets]
+        user: "{{ ansible_facts['user_uid'] }}:{{ ansible_facts['user_gid'] }}"
+        network_mode: none
+        volumes:
+          - "{{ secrets_dir }}:/secrets"
+        detach: false
+        cleanup: true
+        output_logs: true
+      register: prepare_keygen
+      # The script's own line, not the word anywhere in the output.
+      changed_when: "'changed' in prepare_keygen.container.Output.splitlines()"
+
+    - name: Generate the admin's login key
+      community.crypto.openssh_keypair:
+        path: "{{ secrets_dir }}/ssh/id_ed25519"
+        type: ed25519
+        comment: molecule

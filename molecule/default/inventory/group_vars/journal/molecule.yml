@@ -1,0 +1,26 @@
+---
+# group_vars/all is the real inventory/group_vars/all, so the test deploys
+# the shipped defaults. These override them only where a test has to.
+
+# prepare.yml writes throwaway keys here, and only here.
+secrets_dir: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/secrets"
+# Ansible templates variables lazily, so the file is read when the play
+# first uses the variable, in converge, after prepare.yml has written it.
+admin_authorized_keys:
+  - "{{ lookup('file', secrets_dir ~ '/ssh/id_ed25519.pub') }}"
+
+# Caddy issues .localhost names from its internal CA instead of asking a
+# public ACME CA for certificates it could never be granted.
+web_domain: journal.localhost
+
+# Set, so the firewall's conditional I2P rule is exercised.
+i2p_router_port: 24567
+
+# One of each kind: a mirror, and an empty repository created here.
+cgit_repositories:
+  - name: hello-world
+    description: "mirror of GitHub's test repository"
+    source: https://github.com/octocat/Hello-World.git
+    section: mirrors
+  - name: scratch
+    description: "an empty repository"
