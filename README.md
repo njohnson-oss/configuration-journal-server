@@ -1,5 +1,6 @@
 # Configuration - Journal Server
 
+[![Deployment tests](https://github.com/njohnson-oss/configuration-journal-server/actions/workflows/molecule.yml/badge.svg?branch=main)](https://github.com/njohnson-oss/configuration-journal-server/actions/workflows/molecule.yml)
 [![Lint](https://github.com/njohnson-oss/configuration-journal-server/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/njohnson-oss/configuration-journal-server/actions/workflows/lint.yml)
 
 Ansible playbook that serves a website, Gemini capsule, and cgit
