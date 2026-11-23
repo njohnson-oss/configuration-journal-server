@@ -1,0 +1,50 @@
+---
+# Checks each deployment from inside its own container.
+- name: Verify
+  hosts: journal
+  gather_facts: true
+
+  tasks:
+    # ── System ────────────────────────────────────────────────────────
+    - name: Collect service facts
+      ansible.builtin.service_facts:
+
+    # Catches what the unit list below cannot: a service a socket spawns
+    # (fcgiwrap behind cgit-fcgiwrap.socket), and units the play starts
+    # indirectly, through dependencies or packages it installs.
+    - name: Check that no service has failed
+      ansible.builtin.assert:
+        that:
+          - verify_failed | length == 0
+        fail_msg: "Failed services: {{ verify_failed | join(', ') }}"
+        quiet: true
+      vars:
+        verify_failed: >-
+          {{ ansible_facts.services.values()
+             | selectattr('state', 'eq', 'failed')
+             | map(attribute='name') | list }}
+
+    # With no state given, this only reads the unit's status.
+    - name: Read the status of every unit the play runs
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+      register: verify_units
+      loop:
+        - ssh.service
+        - nftables.service
+        - tor@default.service
+        - i2pd.service
+        - caddy.service
+        - agate.service
+        - cgit-fcgiwrap.socket
+        - unattended-upgrades.service
+
+    - name: Check that every unit the play runs is active
+      ansible.builtin.assert:
+        that:
+          - item.status.ActiveState == 'active'
+        fail_msg: "{{ item.item }} is {{ item.status.ActiveState }}"
+        quiet: true
+      loop: "{{ verify_units.results }}"
+      loop_control:
+        label: "{{ item.item }}"

@@ -264,8 +264,10 @@ molecule test
 
 On top of the controller requirements above, this needs Docker. `molecule
 test` boots Debian 12 and 13 containers (privileged, for nftables and the
-units' sandboxing), deploys `site.yml` to each, then runs it again to check
-that nothing changes.
+units' sandboxing), deploys `site.yml` to each, runs it again to check that
+nothing changes, then checks each one from inside:
+
+* every service is up and no unit has failed.
 
 The containers are images from `molecule/default/Dockerfile`: systemd and sshd,
 without sudo or Python, so the first play's bootstrap is tested as well.
@@ -293,5 +295,5 @@ writes its own `ansible.cfg`, so `molecule.yml` turns on the repository's
 (`become_user`) get their module through it, rather than from a temporary
 file of the admin's that those users cannot read.
 
-While iterating, `molecule converge` reruns the play on the existing
-containers; `molecule destroy` removes them and the keys.
+While iterating, `molecule converge` and `molecule verify` rerun the play or the
+checks on the existing containers; `molecule destroy` removes them and the keys.

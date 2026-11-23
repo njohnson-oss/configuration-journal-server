@@ -1,6 +1,7 @@
 ---
-# Deploys site.yml to a Debian 12 and a Debian 13 container, then checks
-# that a second run changes nothing. See "Testing" in README.md.
+# Deploys site.yml to a Debian 12 and a Debian 13 container, checks that a
+# second run changes nothing, then checks the services from inside each
+# container (verify.yml). See "Testing" in README.md.
 #
 # The docker driver (molecule-plugins) builds and boots the containers from
 # `platforms`; inventory/ adds the group's and the hosts' variables to the
@@ -59,4 +60,5 @@ scenario:
     - prepare
     - converge
     - idempotence
+    - verify
     - destroy
