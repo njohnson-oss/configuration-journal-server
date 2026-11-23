@@ -40,6 +40,11 @@ ansible:
       # Molecule writes its own ansible.cfg, so the repository's is not read.
       # Roles and filter plugins are found next to site.yml regardless.
       callback_result_format: yaml
+    connection:
+      # As in the repository's ansible.cfg. Once sshd refuses root, the play
+      # carries on as the admin, and a task that becomes cgit gets its
+      # module through the pipe, not a temporary file cgit cannot read.
+      pipelining: true
   executor:
     args:
       ansible_playbook:

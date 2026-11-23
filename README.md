@@ -283,14 +283,14 @@ What the scenario cannot cover: it never asks a public CA for
 certificates (the names are `.localhost`, which Caddy serves from its
 internal CA), and containers do not enforce AppArmor.
 
-Nor does it connect the way a deployment does. Molecule writes its own
-`ansible.cfg`, so the repository's `pipelining = True` never applies, and it
-reaches each container as root through `docker exec`. A deployment connects
-over SSH, and from its second run on as the admin on `ssh_port`, an
-unprivileged user that becomes root through sudo. That path is untested, and
-it is the one pipelining matters for: the tasks that run as `cgit` or `caddy`
-(`become_user`) get their module through pipelining, rather than from a
-temporary file of the admin's that those users cannot read.
+Nor does it connect the way a deployment does: it reaches each container
+through `docker exec`, not SSH. It does use the same accounts, though: root
+until sshd refuses it, then the admin, an unprivileged user that becomes
+root through sudo, as a deployment does from its second run on. Molecule
+writes its own `ansible.cfg`, so `molecule.yml` turns on the repository's
+`pipelining` there too: the tasks that run as `cgit` or `caddy`
+(`become_user`) get their module through it, rather than from a temporary
+file of the admin's that those users cannot read.
 
 While iterating, `molecule converge` reruns the play on the existing
 containers; `molecule destroy` removes them and the keys.
