@@ -26,7 +26,7 @@ jobs:
       # Pinned like the collections in requirements.yml, so a release
       # changes what CI runs only when it is bumped here.
       - name: Install tools
-        run: pip install ansible-core==2.21.5 ansible-lint==26.9.0 ruff==0.17.0
+        run: pip install ansible-core==2.22.0 ansible-lint==26.9.0 ruff==0.17.0
 
       - name: Install collections
         run: ansible-galaxy collection install -r requirements.yml
