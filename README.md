@@ -231,8 +231,9 @@ workflow checks weekly and fails when a newer release is out:
 
 ```sh
 # post-quantum key exchange only
-ssh -o KexAlgorithms=mlkem768x25519-sha256 deploy@host true
-ssh -o KexAlgorithms=curve25519-sha256 deploy@host true  # must fail
+ssh -o KexAlgorithms=sntrup761x25519-sha512@openssh.com deploy@host true
+ssh -o KexAlgorithms=mlkem768x25519-sha256 deploy@host true  # Debian 13 only
+ssh -o KexAlgorithms=curve25519-sha256 deploy@host true      # must fail
 
 # TLS 1.3 + hybrid PQ group (OpenSSL 3.5+ / a recent curl)
 openssl s_client -connect example.com:443 -tls1_3 -groups X25519MLKEM768 </dev/null | grep -i 'negotiated\|protocol'
