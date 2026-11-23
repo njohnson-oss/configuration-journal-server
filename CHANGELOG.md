@@ -4,7 +4,7 @@
 
 ### Added
 
-- Molecule scenario that deploys to Debian 12 and 13 containers and checks idempotence.
+- Molecule scenario that deploys to Debian 12 and 13 containers and checks idempotence, with a CI workflow to run it.
 
 ## [2.4.0] - 2026-11-21
 
