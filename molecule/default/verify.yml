@@ -1,5 +1,7 @@
 ---
-# Checks each deployment from inside its own container.
+# Checks each deployment from inside its own container. The firewall
+# accepts loopback, so the ruleset is checked by reading it, not by
+# probing it.
 - name: Verify
   hosts: journal
   gather_facts: true
@@ -112,4 +114,18 @@
           - caddy_sources | length > 0
           - caddy_sources | reject('match', ' *-1 ') | list | length == 0
         fail_msg: "{{ caddy_sources }}"
+        quiet: true
+
+    # ── Firewall ──────────────────────────────────────────────────────
+    - name: Read the input chain
+      ansible.builtin.command: nft list chain inet filter input
+      register: verify_input_chain
+      changed_when: false
+
+    - name: Check that only the stack's ports are open
+      ansible.builtin.assert:
+        that:
+          - "'policy drop;' in verify_input_chain.stdout"
+          - verify_input_chain.stdout is search('tcp dport [{] 22, 80, 443, 1965, 24567 [}] ct state new accept')
+          - verify_input_chain.stdout is search('udp dport [{] 443, 24567 [}] ct state new accept')
         quiet: true

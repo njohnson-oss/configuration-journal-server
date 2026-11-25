@@ -268,6 +268,7 @@ units' sandboxing), deploys `site.yml` to each, runs it again to check that
 nothing changes, then checks each one from inside:
 
 * every service is up and no unit has failed;
+* the input chain drops by default and opens exactly the stack's ports;
 * unattended upgrades may update Caddy from Caddy's repository, and apt
   takes nothing else from it.
 
@@ -286,7 +287,8 @@ ephemeral directory; `secrets/` is never read. The deployment uses the real
 
 What the scenario cannot cover: it never asks a public CA for
 certificates (the names are `.localhost`, which Caddy serves from its
-internal CA), and containers do not enforce AppArmor.
+internal CA), it reads the firewall's ruleset rather than probing it, and
+containers do not enforce AppArmor.
 
 Nor does it connect the way a deployment does: it reaches each container
 through `docker exec`, not SSH. It does use the same accounts, though: root
