@@ -267,7 +267,9 @@ test` boots Debian 12 and 13 containers (privileged, for nftables and the
 units' sandboxing), deploys `site.yml` to each, runs it again to check that
 nothing changes, then checks each one from inside:
 
-* every service is up and no unit has failed.
+* every service is up and no unit has failed;
+* unattended upgrades may update Caddy from Caddy's repository, and apt
+  takes nothing else from it.
 
 The containers are images from `molecule/default/Dockerfile`: systemd and sshd,
 without sudo or Python, so the first play's bootstrap is tested as well.

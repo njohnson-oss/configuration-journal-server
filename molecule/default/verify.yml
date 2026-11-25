@@ -48,3 +48,68 @@
       loop: "{{ verify_units.results }}"
       loop_control:
         label: "{{ item.item }}"
+
+    - name: Read the effective apt configuration
+      ansible.builtin.command: apt-config dump
+      register: verify_apt_config
+      changed_when: false
+
+    - name: Check that upgrades install and reboot unattended
+      ansible.builtin.assert:
+        that:
+          - "'APT::Periodic::Unattended-Upgrade \"1\";' in verify_apt_config.stdout_lines"
+          - "'Unattended-Upgrade::Automatic-Reboot \"true\";' in verify_apt_config.stdout_lines"
+        quiet: true
+
+    # unattended-upgrades decides with its own code, which is loaded here
+    # to judge each package's installed version by the host's
+    # configuration. That version's dpkg status entry is always allowed
+    # and names no site, so only origins with a site are reported.
+    - name: Ask unattended-upgrades which repositories it may upgrade packages from
+      ansible.builtin.command:
+        argv:
+          - python3
+          - -c
+          - |
+            import importlib.machinery, importlib.util, json, sys
+            import apt
+            loader = importlib.machinery.SourceFileLoader("uu", "/usr/bin/unattended-upgrade")
+            uu = importlib.util.module_from_spec(importlib.util.spec_from_loader("uu", loader))
+            loader.exec_module(uu)
+            allowed = uu.get_allowed_origins()
+            cache = apt.Cache()
+            print(json.dumps({
+                name: [o.site for o in cache[name].installed.origins
+                       if o.site and uu.is_allowed_origin(o, allowed)]
+                for name in sys.argv[1:]
+            }))
+          - caddy
+      register: verify_upgrade_sites
+      changed_when: false
+
+    - name: Check that Caddy is upgraded unattended too
+      ansible.builtin.assert:
+        that:
+          - "'dl.cloudsmith.io' in (verify_upgrade_sites.stdout | from_json).caddy"
+        fail_msg: "unattended-upgrades may upgrade only from {{ verify_upgrade_sites.stdout }}"
+        quiet: true
+
+    # Without arguments, apt-cache policy lists each source with the
+    # priority its general pin gives it, not the package-specific pin that
+    # lets Caddy through.
+    - name: Read the priority apt gives each package source
+      ansible.builtin.command: apt-cache policy
+      register: verify_apt_policy
+      changed_when: false
+
+    - name: Check that apt takes nothing else from Caddy's repository
+      vars:
+        caddy_sources: >-
+          {{ verify_apt_policy.stdout_lines
+             | select('search', ' https://dl[.]cloudsmith[.]io/') | list }}
+      ansible.builtin.assert:
+        that:
+          - caddy_sources | length > 0
+          - caddy_sources | reject('match', ' *-1 ') | list | length == 0
+        fail_msg: "{{ caddy_sources }}"
+        quiet: true
