@@ -8,8 +8,8 @@
 # fetched and pinned by checksum: sha256 of the published .gz, per
 # target triple. Update the version and the checksums together --
 # get_url refuses the download if they disagree. Unattended upgrades
-# cannot do this; .github/workflows/agate.yml fails when a newer release
-# is out.
+# cannot do this; agate.yml, in .github/workflows and .forgejo/workflows,
+# fails when a newer release is out.
 gemini_version: 3.3.25
 gemini_release_checksums:
   x86_64-unknown-linux-gnu: 37af86aea6565dd485aaa308c693966dfe539c5c82af5fdb784a126429320db1
