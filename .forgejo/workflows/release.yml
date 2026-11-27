@@ -1,0 +1,43 @@
+---
+name: Release
+
+# Publishes a release for each version tag, with the tag's message as its
+# notes. The tag must be annotated: a lightweight one has no message.
+"on":
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: codeberg-tiny
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Read the tag message
+        env:
+          TAG: ${{ forge.ref_name }}
+        run: |
+          if [ "$(git cat-file -t "$TAG")" != tag ]; then
+            echo "::error::$TAG is a lightweight tag, so it has no message"
+            exit 1
+          fi
+          # Subject and body, leaving out any signature.
+          git tag --list "$TAG" --format='%(contents:subject)%0a%0a%(contents:body)' > notes.md
+
+      - name: Publish the release
+        env:
+          TOKEN: ${{ forge.token }}
+          API: ${{ forge.api_url }}
+          REPO: ${{ forge.repository }}
+          TAG: ${{ forge.ref_name }}
+        run: |
+          jq -n --arg tag "$TAG" --rawfile notes notes.md \
+            '{tag_name: $tag, name: $tag, body: $notes}' > release.json
+          curl -sS --fail-with-body \
+            -H "Authorization: token $TOKEN" \
+            -H "Content-Type: application/json" \
+            --data @release.json \
+            "$API/repos/$REPO/releases"
