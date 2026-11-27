@@ -13,9 +13,6 @@ name: Agate release
     - cron: "17 6 * * 1"
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   agate:
     runs-on: codeberg-tiny

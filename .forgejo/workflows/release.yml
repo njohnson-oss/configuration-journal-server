@@ -7,9 +7,6 @@ name: Release
   push:
     tags: ["v*"]
 
-permissions:
-  contents: write
-
 jobs:
   release:
     runs-on: codeberg-tiny
