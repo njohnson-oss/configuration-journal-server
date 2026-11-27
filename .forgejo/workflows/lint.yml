@@ -7,7 +7,7 @@ name: Lint
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ forge.workflow }}-${{ forge.ref }}
   cancel-in-progress: true
 
 jobs:
