@@ -1,10 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [2.5.0] - 2026-11-27
 
 ### Added
 
 - Molecule scenario that deploys to Debian 12 and 13 containers, checks idempotence and verifies every service, with a CI workflow to run it.
+- Codeberg copies of the Lint, Agate release and Release workflows, in `.forgejo/workflows`. The Molecule workflow has none, since Codeberg's hosted runners have no Docker daemon and stop a job after 10 minutes at most.
 
 ## [2.4.0] - 2026-11-21
 
@@ -109,6 +110,7 @@
 
 - Initial release: nine roles deploying a hardened Debian web, Gemini and Git server over clearnet, Tor and I2P.
 
+[2.5.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.3.2...v2.4.0
 [2.3.2]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/njohnson-oss/configuration-journal-server/compare/v2.3.0...v2.3.1
